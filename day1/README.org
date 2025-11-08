@@ -1,0 +1,908 @@
+#+TITLE: Parallel Programming Using OpenMP
+#+AUTHOR: Abhishek Raj
+#+DATE: 2025-11-08
+
+* Setting up environment
+** compile
+#+begin_src bash :session gcc14 :results output 
+source /scratch/$USER/spack/share/spack/setup-env.sh
+spack load gcc/6qthuq2
+export PATH="/home/abhishekraj.cdac/.local/gitpush:$PATH"
+#+end_src
+
+** run
+#+begin_src bash :tangle script.sh
+
+#!/bin/bash
+#SBATCH -N 1                                    # Nodes = 1
+#SBATCH --ntasks-per-node=40                    # Tasks on each node = 40 
+#SBATCH --job-name=omp                          # Specify job name
+#SBATCH --output=%J.out                         # Name of your output file (%J is replaced with job_id)
+#SBATCH --error=%J.err                          # Name of your error file
+#SBATCH --time=1-00:00:00                       # Specify time taken to run your script
+#SBATCH --partition=cpu                         # Specify partition (cpu, gpu, hm)
+#SBATCH --reservation=hpcws
+
+ulimit -s unlimited
+
+./$1
+
+#+end_src
+
+* Part 1
+
+* Agenda
+- What is Parallel Programming?
+- Why Parallel Programming?
+- Concurrency vs Parallelism
+- Terminology
+- What is OpenMP?
+- Hello World in OpenMP.
+
+* Serial Computing
+- Problem is broken into stream of instructions that are executed sequentially one after the other on a single processor.
+- One instruction executes at a time.
+  
+* Parallel Computing
+- Doing things simultaneously
+- Same thing or different thing
+- Solving one large problem
+
+- Here things refers to programs or tasks (parts of programs).
+
+* Why Parallel Computing
+- Handling complex tasks
+- Improved performance
+- Better resource utilization
+- Scalability
+- Save time
+- Save money
+
+* Applications of Parallel Computing
+- Data mining
+- Real-time simulations
+- Scientific calculations
+- Graphical applications
+- AI and Machine Learning, etc.
+
+* Serial Computing vs Parallel Computing
+** Serial Computing
+- Problem is broken into stream of instructions executed one after the other by a single core.
+
+** Parallel Computing
+- Problem is broken into parts that can be solved concurrently.
+- Each part is further broken into stream of instructions.
+- Instructions from different parts execute simultaneously on different processors.
+
+* Concurrency vs Parallelism
+- Concurrency Parallel Execution
+- Parallel Concurrent Execution
+- Parallelism
+
+** Concurrency
+Making progress on more than one task - seemingly at the same time.
+
+** Parallel Execution
+Making progression on more than one task at the exact same time.
+
+** Parallelism
+Splitting a single task into subtasks which can be executed in parallel.
+
+* Types of Parallelism
+** Task Parallelism
+Tasks are divided between number of processes/cores.
+
+** Data Parallelism
+- Data is divided between number of processes/cores.
+- They all perform similar tasks.
+
+* General Parallel Computing Terminology
+- Shared Memory
+- Distributed Memory
+- Node
+- Core
+- CPU
+- Process
+- Thread
+
+* Shared Memory
+- Memory is shared between multiple CPU/cores.
+- OpenMP is used.
+
+* Distributed Memory
+- Every CPU has their own memory space and they are connected through a network.
+- Message Passing is used.
+
+* Terminology
+- *Node*: A standalone "computer in a box." Usually comprised of multiple CPUs/processors/cores, memory, network interfaces, etc. Nodes are networked together to comprise a supercomputer.
+- *CPU*: Contemporary CPUs consist of one or more cores.
+- *Process*: A process is an instance of a program that is being executed or processed.
+- *Thread*: Thread is a segment of a process or a lightweight process that is managed by the scheduler independently.
+
+* What is OpenMP?
+- OpenMP stands for Open Multi-Processing.
+- Portable /shared memory/ programming.
+- It is an API that is used for parallelizing codes.
+- Compatible with C/C++ and Fortran.
+
+* Why OpenMP?
+- Easy to learn: Pragma based syntaxes.
+- No need to changes the whole code (one line is enough to make your code parallel).
+- Compiler takes care of all the complexity behind the scene of running your code.
+- Support: Works with gcc compiler.
+- Extra functionalities can be added using Environment Variables and Runtime-library routines.
+
+* Hello World in C
+#+begin_src C :tangle hello.c
+#include<stdio.h>
+int main(){
+    printf("Hello, World\n");
+    return 0;
+}
+#+end_src
+
+* Compile and Run C
+#+begin_src bash :session gcc14 :results output
+#gcc --version
+gcc hello.c -o hello.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session gcc14 :results output
+#gcc --version
+sbatch script.sh hello.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1160195
+
+* Hello World in OpenMP
+#+begin_src C :tangle hello_omp.c
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    #pragma omp parallel
+    {
+        printf("Hello, World\n");
+    }
+    return 0;
+}
+#+end_src
+
+* Compile and Run OpenMP
+#+begin_src bash :session gcc14 :results output 
+gcc hello_omp.c -o hello_omp.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session gcc14 :results output
+sbatch script.sh hello_omp.out
+#./hello_omp.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1160209
+
+
+* Part 2
+
+* Agenda
+- Understanding OpenMP code
+- Script for running OpenMP jobs
+- OpenMP directives
+- Thread creation
+- Environment Variables
+- OpenMP Runtime Routines
+
+* Script for Running OpenMP Jobs
+- Create a file named *run.sh* in your code folder and paste below content in the file.
+- After that make the file executable.
+
+#+begin_src bash :tangle run.sh :session gcc14 :results output
+#!/bin/bash
+#SBATCH --job-name=openmp        ### Job Name
+#SBATCH --time=00:03:00              ### WallTime
+#SBATCH --nodes=1                    ### Number of Nodes
+#SBATCH --ntasks-per-node=1          ### Number of tasks (MPI processes)
+#SBATCH -n=$OMP_NUM_THREADS          ### Number of cores (OMP threads)
+
+./$1
+#+end_src
+
+* Using run.sh script
+- Create a file called run.sh in your folder and paste the content inside the file.
+- Make the file executable using below command:
+
+#+begin_src bash :session gcc14 :results output
+chmod +x run.sh
+#+end_src
+
+- Now you can run your code using below command:
+
+#+begin_src bash :session gcc14 :results output
+./run.sh ./a.out
+#+end_src
+
+- You can also use this if previous is not working:
+
+#+begin_src bash :session gcc14 :results output
+sbatch run.sh ./a.out
+#+end_src
+
+* Fork-Join Model
+** Parallel Region
+#+begin_src C
+#pragma omp parallel
+{
+    // this is the parallel region
+    // anything written here will be executed by multiple threads
+}
+#+end_src
+
+* OpenMP Constructs and Clause
+#+begin_src C
+#pragma omp [constructs] [clause]
+{
+    // this is the parallel region
+    // anything written here will be executed by multiple cores
+}
+#+end_src
+
+* OpenMP Constructs
+Constructs tell the compiler *where and how* to parallelize the code.
+
+** Common constructs:
+- parallel
+- for
+- section
+- atomic
+- master
+- single
+- sections, etc.
+
+* OpenMP Clause
+Clauses refine how the parallelism is implemented, control thread behavior, and specify how variables are shared among threads.
+
+** Common clauses:
+- if
+- num_threads
+- reduction
+- private
+- shared
+- firstprivate
+- lastprivate, etc.
+
+* Assigning Number of Threads
+** Using Environment Variables
+#+begin_src bash :session gcc14 :results output
+export OMP_NUM_THREADS=4
+#+end_src
+
+** Using OpenMP Clause
+#+begin_src C
+#pragma omp parallel num_threads(4)
+#+end_src
+
+** Using Runtime Routine
+#+begin_src C
+omp_set_num_threads(4);
+#+end_src
+
+* Assigning Number of Threads — Order of Precedence
+Order of Precedence for assigning number of threads:
+
+1. num_threads() clause
+2. Routine calls (omp_set_num_threads)
+3. Environment variables
+
+If all are present → clause takes highest precedence.
+
+* Assigning Number of Threads (Example)
+#+begin_src C
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    //omp_set_num_threads(2);
+    #pragma omp parallel num_threads(7)
+    {
+        //omp_get_thread_num();
+        printf("Hello, World \n" );
+    }
+    return 0;
+}
+#+end_src
+
+* Runtime Library Routines
+- omp_set_num_threads(n);  
+  Set number of threads, n can be any natural number.
+
+- omp_get_num_threads();  
+  Returns total number of threads inside a parallel region.  
+  If called outside parallel region, returns 1.
+
+- omp_get_thread_num();  
+  Returns the id of a particular thread (unique id per thread).
+
+* Printing thread id of each thread (Example)
+#+begin_src C
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    //omp_set_num_threads(2);
+    #pragma omp parallel num_threads(7)
+    {
+        printf("Hello, World from thread %d\n", omp_get_thread_num());
+    }
+    return 0;
+}
+#+end_src
+
+
+* Part 3
+
+* Agenda
+- OpenMP Memory Model
+- Data scoping
+- Work-sharing constructs
+- OpenMP for
+- OpenMP Error correction
+
+* OpenMP Memory Model
+- OpenMP uses the *shared memory model*:
+- Most variables are *shared by default* among threads, unless specified otherwise.
+
+* Data Scoping Clauses
+- shared
+- private
+- default
+- firstprivate
+- lastprivate
+
+* Threads in a Parallel Region
+Example: Number of threads = 4
+(Threads execute concurrently within parallel region.)
+
+* Printing thread id of each thread (Example)
+#+begin_src C
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    //omp_set_num_threads(2);
+    #pragma omp parallel num_threads(7)
+    {
+        int tid = omp_get_thread_num();
+        printf("Hello, World from thread %d\n", tid);
+    }
+    return 0;
+}
+#+end_src
+
+* Private
+- Private means every thread has its *own copy* of the variables.
+- Changes made inside parallel region are not visible to other threads.
+- Variables created inside a parallel region are private by default.
+
+Syntax:
+#+begin_src C
+int x = 10, y = 20, z;
+#pragma omp parallel private(x, y, z)
+#+end_src
+- Private clause can take multiple variables separated by commas.
+
+* Private Example
+#+begin_src C
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    int x = 10;
+    int y = 20;
+    #pragma omp parallel private(x,y)
+    {
+        printf("Thread %d: x = %d and y = %d\n", omp_get_thread_num(), x, y);
+    }
+    return 0;
+}
+#+end_src
+
+* Shared
+- Shared means variables are accessible to all threads.
+- By default, most variables outside the parallel region are shared.
+
+Syntax:
+#+begin_src C
+int x = 10, y = 20, z;
+#pragma omp parallel shared(x, y, z)
+#+end_src
+
+* Shared Example
+#+begin_src C
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    int x = 10;
+    int y = 20;
+    #pragma omp parallel shared(x,y)
+    {
+        printf("Thread %d: x = %d and y = %d\n", omp_get_thread_num(), x, y);
+    }
+    return 0;
+}
+#+end_src
+
+* Firstprivate
+- Similar to private
+- BUT copies initial values of variables from outside region to each thread’s private copy
+
+Syntax:
+#+begin_src C
+int x = 10, y = 20, z;
+#pragma omp parallel firstprivate(x, y, z)
+#+end_src
+
+* Firstprivate Example
+#+begin_src C
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    int x = 10;
+    int y = 20;
+    #pragma omp parallel firstprivate(x,y)
+    {
+        printf("Thread %d: x = %d and y = %d\n", omp_get_thread_num(), x, y);
+    }
+    return 0;
+}
+#+end_src
+
+* Benefits of Firstprivate Clause
+- Initialization: Ensures each thread starts with same initial values
+- Isolation: Each thread has its own copy
+- Independence: Changes do not affect others’ values
+
+* Default
+Default clause specifies how variables are shared when not explicitly stated.
+
+Values:
+- shared → default behavior
+- none → requires explicit specification for every variable
+
+Syntax:
+#+begin_src C
+#pragma omp parallel default(none)
+#+end_src
+
+* Default Example
+#+begin_src C
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    int x = 10;
+    int y = 20;
+    #pragma omp parallel default(none) shared(x) private(y)
+    {
+        printf("Thread %d: x = %d and y = %d\n", omp_get_thread_num(), x, y);
+    }
+    return 0;
+}
+#+end_src
+
+
+* Part 4
+
+* Agenda
+- Work-sharing constructs
+- OpenMP for
+- Lastprivate clause
+- Creating data parallelly
+- Conditional Compilation
+
+* Work-sharing Constructs
+Work-sharing constructs are used to distribute the workload among threads in a parallel region.
+
++ They are used to divide the work of:
+- a loop
+- a section of code
+- or tasks among threads.
+
++ Commonly used:
+- for
+- sections
+- single
+- task
+
+* For Construct
+#+begin_src C
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    #pragma omp parallel for
+    for(int i = 0; i < 5; i++){
+        printf("Hello, World\n");
+    }
+    return 0;
+}
+#+end_src
+
+* Lastprivate
+The lastprivate clause is used to preserve the value of a variable from the *last iteration*.
+
++ Similar to private:
+- Values are private inside parallel region
+- BUT the final iteration's value gets copied back.
+
++ Syntax:
+#+begin_src C
+#pragma omp parallel for lastprivate(x, y, z)
+#+end_src
+
+* Lastprivate Example
+#+begin_src C
+#include<stdio.h>
+#include<omp.h>
+#include<stdlib.h>
+int main(){
+    int x = 10;
+    #pragma omp parallel lastprivate(x,y)
+    {
+        x  = rand() % 100 + 1;
+        printf("Thread %d: x = %d\n", omp_get_thread_num(), x);
+    }
+    return 0;
+}
+#+end_src
+
+* Creating Data Parallelly
+#+begin_src C
+#include<stdio.h>
+#include<omp.h>
+#define N 100
+int main(){
+    int arr[N];
+    #pragma omp parallel for num_threads(10)
+    for(int i = 0; i < 5; i++){
+        arr[i] = i + 1;
+    }
+    return 0;
+}
+#+end_src
+
+* Conditional Compilation
++ Improves portability of your code.
++ Same code can be used as serial and parallel.
+
++ -fopenmp is used to enable openmp support.
+
+#+begin_src C
+#ifdef _OPENMP
+#include<omp.h>
+#endif
+
+#ifdef _OPENMP
+    omp_set_num_threads(10);
+#endif
+#+end_src
+
+* Conditional Compilation Example
+#+begin_src C
+#include<stdio.h>
+#ifdef _OPENMP
+#include<omp.h>
+#endif
+int main(){
+    int tid = 0;
+    int totalThread = 0;
+#ifdef _OPENMP
+    omp_set_num_threads(10);
+#endif
+    #pragma omp parallel
+    {
+#ifdef _OPENMP
+        tid = omp_get_thread_num();
+        totalThread = omp_get_num_threads();
+#endif
+        printf("Hello from thread %d of %d\n", tid, totalThread);
+    }
+    return 0;
+}
+#+end_src
+
+
+* Part 5
+
+* Agenda
+- Conditional Compilation
+- OpenMP Scheduling
+- Static, Dynamic, Guided, Runtime
+
+* OpenMP Scheduling
+Scheduling manages how iterations of a loop are distributed among threads.
+
++ Goal:
+- Balance the workload across threads
+- Minimize idle time
+- Ensure efficient execution
+
++ Types:
+- static
+- dynamic
+- guided
+- auto
+- runtime
+
++ Syntax:
+#+begin_src C
+#pragma omp parallel for schedule(kind, chunksize)
+#+end_src
+
++ Using environment variable:
+#+begin_src bash :session gcc14 :results output
+export OMP_SCHEDULE="KIND, CHUNKSIZE"
+#+end_src
+
++ Kind values:
+- static, dynamic, guided, auto, runtime
+
++ Chunksize values:
+- 1, 2, 3, …, N
+
+* Static Scheduling
+- Iterations are pre-assigned to threads in contiguous chunks before loop starts.
+- Default scheduling mode.
+- Low overhead and predictable execution.
+- Can lead to load imbalance if iterations have varying execution times.
+
++ Syntax:
+#+begin_src C
+#pragma omp parallel for schedule(static, chunksize)
+#+end_src
+
+* Dynamic Scheduling
+- Iterations assigned to threads *during execution*.
+- Higher runtime overhead.
+- Better for uneven workloads.
+- Good load balancing.
+
++ Syntax:
+#+begin_src C
+#pragma omp parallel for schedule(dynamic, chunksize)
+#+end_src
+
+* Guided Scheduling
+- Similar to dynamic but chunk size decreases exponentially.
+- Good load balancing with reduced overhead.
+- n specifies smallest chunk size (default is 1).
+
++ Syntax:
+#+begin_src C
+#pragma omp parallel for schedule(guided, n)
+#+end_src
+
+* Runtime Scheduling
++ Allows changing schedule type *without recompiling*.
+
++ Compile code once using schedule(runtime)
+
+#+begin_src C
+#pragma omp parallel for schedule(runtime)
+#+end_src
+
++ Then set schedule externally:
+
+#+begin_src bash :session gcc14 :results output
+export OMP_SCHEDULE="static,3"
+#+end_src
+
+
+* Part 6
+
+* Agenda
+- Runtime Routines for scheduling
+- Assigning work to a particular thread
+- OpenMP Barrier
+- OpenMP Single
+- OpenMP Master
+- OpenMP Critical
+
+* Runtime Routines for Scheduling
+#+begin_src C
+omp_set_schedule(kind, chunksize)
+#+end_src
+
++ Example:
+#+begin_src C
+omp_sched_t kind = omp_sched_static;
+omp_set_schedule(kind, 2);
+#+end_src
+
++ Other types:
+- omp_sched_dynamic
+- omp_sched_guided
+- omp_sched_auto
+
+* OpenMP Barrier
++ All threads wait at this point until all threads reach it.
+
++ Syntax:
+#+begin_src C
+#pragma omp barrier
+#+end_src
+
+* OpenMP Single
++ Only *one thread* executes this block.
+
++ Syntax:
+#+begin_src C
+#pragma omp single
+{
+    // code here
+}
+#+end_src
+
++ (Implicit barrier unless “nowait” is used)
+
+* OpenMP Master
++ Only *master thread (thread 0)* executes this block.
++ No implicit barrier after master block.
+
++ Syntax:
+#+begin_src C
+#pragma omp master
+{
+    // code here
+}
+#+end_src
+
+* OpenMP Critical
++ Ensures *only one thread* enters the block at a time.
++ Prevents race conditions.
+
++ Syntax:
+#+begin_src C
+#pragma omp critical
+{
+    // code here
+}
+#+end_src
+
+
+* Part 7
+
+* Agenda
+- Synchronization in OpenMP
+- OpenMP Critical
+- OpenMP Atomic
+- Sum Program
+- Practice Q/A
+
+* Synchronization
++ Threads share resources and memory.
++ Without synchronization → race conditions and incorrect results.
+
++ Common synchronization constructs:
+- critical
+- barrier
+- atomic
+
+* OpenMP Critical (again)
+Protects shared variables from concurrent updates.
+
+#+begin_src C
+#pragma omp critical
+{
+    // code here
+}
+#+end_src
+
+* Reduction
++ Allows safe parallel accumulation.
+
++ Syntax:
+#+begin_src C
+#pragma omp parallel for reduction(operator: variable)
+#+end_src
+
++ Example:
+#+begin_src C
+int sum = 0;
+#pragma omp parallel for reduction(+: sum)
+for (int i = 0; i < 10000; i++) {
+    sum += i;
+}
+#+end_src
+
+* Measuring Time
+Use `omp_get_wtime()`:
+
+#+begin_src C
+start_time = omp_get_wtime();
+
+#pragma omp parallel for reduction(+:sum)
+for (int i = 0; i < 1000000; i++) {
+    sum += i;
+}
+
+end_time = omp_get_wtime();
+printf("Execution Time: %f seconds\n", end_time - start_time);
+#+end_src
+
+
+* Part 8
+
+* Agenda
+- Reduction
+- OpenMP Atomic
+- Sum Program Practice
+
+* Atomic
++ Ensures a specific update is performed indivisibly.
+
++ Syntax:
+#+begin_src C
+#pragma omp atomic
+sum += arr[i];
+#+end_src
+
+* Problem
+Create a program to perform sum of thread ids of every thread.
+
+* Assignment
+Create a parallel matrix addition program.
+- Assign your data with 1.
+- Create serial and parallel version in the same code.
+- Measure computation time.
+
+  
+* Part 9
+
+* Agenda
+- Sections
+- Nowait
+- Sum of two array
+- Prime number calculator
+- PI calculator
+
+* Sections
++ Used to divide work into independent tasks.
+
++ Syntax:
+#+begin_src C
+#pragma omp parallel sections
+{
+    #pragma omp section
+    {
+        //task 1
+    }
+    #pragma omp section
+    {
+        //task 2
+    }
+}
+#+end_src
+
++ Implicit barrier at end unless “nowait” is used.
+
+* Nowait
++ Removes implicit barrier.
+
++ Syntax:
+#+begin_src C
+#pragma omp parallel sections nowait
+{
+    #pragma omp section
+    {
+        //task 1
+    }
+    #pragma omp section
+    {
+        //task 2
+    }
+}
+#+end_src
+
+* Assignment
+- Create a parallel matrix multiplication program.
+- Assign your data with 1.
+- Create serial and parallel version in same code.
+- Measure computation time.
