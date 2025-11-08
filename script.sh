@@ -1,10 +1,3 @@
-#+TITLE: README
-#+AUTHOR: Abhishek Raj
-#+DATE: 2025-11-08
-
-* SLURM script
-#+begin_src bash :tangle script.sh
-
 #!/bin/bash
 #SBATCH -N 1                                    # Nodes = 1
 #SBATCH --ntasks-per-node=40                    # Tasks on each node = 40 
@@ -18,7 +11,3 @@
 ulimit -s unlimited
 
 ./a.out
-
-#+end_src
-
-
