@@ -10,6 +10,8 @@ spack load gcc/6qthuq2
 export PATH="/home/abhishekraj.cdac/.local/gitpush:$PATH"
 #+end_src
 
+#+RESULTS:
+
 ** run
 #+begin_src bash :tangle script.sh
 
@@ -65,7 +67,13 @@ ulimit -s unlimited
 - Graphical applications
 - AI and Machine Learning, etc.
 
-* Serial Computing vs Parallel Computing
+* Serial Computing vs Parallel Computing :ATTACH:
+:PROPERTIES:
+:ID:       ae6f9ae3-a3d0-46ad-84c9-6b10fb553c54
+:END:
+
+[[attachment:_20251109_211039Parallel-vs-sequential-programming.png]]
+
 ** Serial Computing
 - Problem is broken into stream of instructions executed one after the other by a single core.
 
@@ -74,16 +82,15 @@ ulimit -s unlimited
 - Each part is further broken into stream of instructions.
 - Instructions from different parts execute simultaneously on different processors.
 
-* Concurrency vs Parallelism
-- Concurrency Parallel Execution
-- Parallel Concurrent Execution
-- Parallelism
+* Concurrency vs Parallelism :ATTACH:
+:PROPERTIES:
+:ID:       e0fc86cd-4306-481c-b38d-7d2e0e080c1d
+:END:
+
+[[attachment:_20251109_2117341*cbFp5h440Mo0gOlY-A7Scg.jpeg]]
 
 ** Concurrency
 Making progress on more than one task - seemingly at the same time.
-
-** Parallel Execution
-Making progression on more than one task at the exact same time.
 
 ** Parallelism
 Splitting a single task into subtasks which can be executed in parallel.
@@ -105,11 +112,23 @@ Tasks are divided between number of processes/cores.
 - Process
 - Thread
 
-* Shared Memory
+* Shared Memory :ATTACH:
+:PROPERTIES:
+:ID:       88be0043-790c-4093-bef0-d71d9a565734
+:END:
+
+[[attachment:_20251109_2105467tbYe.png]]
+
 - Memory is shared between multiple CPU/cores.
 - OpenMP is used.
 
-* Distributed Memory
+* Distributed Memory :ATTACH:
+:PROPERTIES:
+:ID:       5ad40a64-45e0-4d6e-9bbd-6d809c7e0b24
+:END:
+
+[[attachment:_20251109_210837UzaWGc5.jpg]]
+
 - Every CPU has their own memory space and they are connected through a network.
 - Message Passing is used.
 
@@ -182,9 +201,6 @@ sbatch script.sh hello_omp.out
 #./hello_omp.out
 #+end_src
 
-#+RESULTS:
-: Submitted batch job 1160209
-
 
 * Part 2
 
@@ -200,38 +216,50 @@ sbatch script.sh hello_omp.out
 - Create a file named *run.sh* in your code folder and paste below content in the file.
 - After that make the file executable.
 
-#+begin_src bash :tangle run.sh :session gcc14 :results output
+#+begin_src bash :tangle script.sh :session gcc14 :results output
 #!/bin/bash
-#SBATCH --job-name=openmp        ### Job Name
-#SBATCH --time=00:03:00              ### WallTime
-#SBATCH --nodes=1                    ### Number of Nodes
-#SBATCH --ntasks-per-node=1          ### Number of tasks (MPI processes)
-#SBATCH -n=$OMP_NUM_THREADS          ### Number of cores (OMP threads)
+#SBATCH -N 1                                    # Nodes = 1
+#SBATCH --ntasks-per-node=40                    # Tasks on each node = 40 
+#SBATCH --job-name=omp                          # Specify job name
+#SBATCH --output=%J.out                         # Name of your output file (%J is replaced with job_id)
+#SBATCH --error=%J.err                          # Name of your error file
+#SBATCH --time=1-00:00:00                       # Specify time taken to run your script
+#SBATCH --partition=cpu                         # Specify partition (cpu, gpu, hm)
+#SBATCH --reservation=hpcws
+
+ulimit -s unlimited
 
 ./$1
 #+end_src
 
-* Using run.sh script
-- Create a file called run.sh in your folder and paste the content inside the file.
+* Using script.sh script
+- Create a file called script.sh in your folder and paste the content inside the file.
 - Make the file executable using below command:
 
 #+begin_src bash :session gcc14 :results output
-chmod +x run.sh
+chmod +x script.sh
 #+end_src
 
-- Now you can run your code using below command:
+- Now you can run your code using below command (run on the node directly):
 
 #+begin_src bash :session gcc14 :results output
-./run.sh ./a.out
+./script.sh a.out
 #+end_src
 
-- You can also use this if previous is not working:
+- You can also use this if previous is not working (slurm scheduling):
 
 #+begin_src bash :session gcc14 :results output
-sbatch run.sh ./a.out
+sbatch script.sh a.out
 #+end_src
 
-* Fork-Join Model
+* Fork-Join Model :ATTACH:
+:PROPERTIES:
+:ID:       81049272-ddf6-4a78-9f94-30aff6892a5a
+:END:
+
+[[attachment:_20251109_212054fork_join.gif]]
+
+
 ** Parallel Region
 #+begin_src C
 #pragma omp parallel
@@ -359,10 +387,6 @@ int main(){
 - default
 - firstprivate
 - lastprivate
-
-* Threads in a Parallel Region
-Example: Number of threads = 4
-(Threads execute concurrently within parallel region.)
 
 * Printing thread id of each thread (Example)
 #+begin_src C
@@ -612,7 +636,6 @@ int main(){
 * Part 5
 
 * Agenda
-- Conditional Compilation
 - OpenMP Scheduling
 - Static, Dynamic, Guided, Runtime
 
@@ -906,3 +929,23 @@ Create a parallel matrix addition program.
 - Assign your data with 1.
 - Create serial and parallel version in same code.
 - Measure computation time.
+
+
+* Example codes
+- Array Addition : [[file:codes.org::arrayAddition][arrayAddition]]
+- private : [[file:codes.org::private][private]]
+- firstprivate : [[file:codes.org::firstprivate][firstprivate]]
+- lastprivate : [[file:codes.org::lastprivate][lastprivate]]
+- conditionalCompillation : [[file:codes.org::conditionalCompillation][conditionalCompillation]]
+- manualReduction : [[file:codes.org::manualReduction][manualReduction]]
+- manualReduction1 : [[file:codes.org::manualReduction1][manualReduction1]]
+- barrier : [[file:codes.org::barrier][barrier]]
+- critical : [[file:codes.org::critical][critical]]
+- dynamic : [[file:codes.org::dynamic][dynamic]]
+- dynamic1 : [[file:codes.org::dynamic1][dynamic1]]
+- static : [[file:codes.org::static][static]]
+- section : [[file:codes.org::section][section]]
+- atomic : [[file:codes.org::atomic][atomic]]
+- Matrix Addition : [[file:codes.org::matrixAddition][matrixAddition]]
+- taskParallelism : [[file:codes.org::taskParallelism][taskParallelism]]
+- taskParallelism1 : [[file:codes.org::taskParallelism1][taskParallelism1]]
