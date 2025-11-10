@@ -1029,6 +1029,7 @@ sbatch script.sh primeCount.out
 #+RESULTS:
 : Submitted batch job 1163793
 
+
 * prime count parallel
 #+begin_src C :tangle primeCount_parallel.c
 #include<stdio.h>

@@ -589,7 +589,7 @@ Syntax:
 int main(){
     int x = 10;
     int y = 20;
-    #pragma omp parallel default(none) shared(x) private(y)
+    #pragma omp parallel default(none) shared(x) firstprivate(y)
     {
         printf("Thread %d: x = %d and y = %d\n", omp_get_thread_num(), x, y);
     }
@@ -670,7 +670,7 @@ int main(){
 int main(){
     int arr[N];
     #pragma omp parallel for num_threads(10)
-    for(int i = 0; i < 5; i++){
+    for(int i = 0; i < N; i++){
         arr[i] = i + 1;
     }
     return 0;

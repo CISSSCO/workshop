@@ -1,0 +1,22 @@
+#+title: Linux
+ 
+* Basic linux commands
+- create a folder
+  #+begin_src bash
+mkdir folderName
+  #+end_src
+
+- delete a file
+  #+begin_src bash
+rm filename
+  #+end_src
+  
+- delete an empty folder
+#+begin_src bash
+rmdir folderName
+#+end_src
+
+- create a file
+  #+begin_src bash
+touch filename
+  #+end_src
