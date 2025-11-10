@@ -6,8 +6,8 @@
 #SBATCH --error=%J.err                          # Name of your error file
 #SBATCH --time=1-00:00:00                       # Specify time taken to run your script
 #SBATCH --partition=hm                         # Specify partition (cpu, gpu, hm)
-##SBATCH --reservation=hpcws
+##SBATCH --reservation=hpcws.user
 
-ulimit -s unlimited
+#ulimit -s unlimited
 
 ./$1
