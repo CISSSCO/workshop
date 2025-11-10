@@ -1,0 +1,1096 @@
+#+title: Codes
+
+* Setting up environment
+** compile
+#+begin_src bash :session gcc14 :results output 
+source /scratch/$USER/spack/share/spack/setup-env.sh
+spack load gcc/6qthuq2
+export PATH="/home/abhishekraj.cdac/.local/gitpush:$PATH"
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :tangle script.sh
+
+#!/bin/bash
+#SBATCH -N 1                                    # Nodes = 1
+#SBATCH --ntasks-per-node=40                    # Tasks on each node = 40 
+#SBATCH --job-name=omp                          # Specify job name
+#SBATCH --output=%J.out                         # Name of your output file (%J is replaced with job_id)
+#SBATCH --error=%J.err                          # Name of your error file
+#SBATCH --time=1-00:00:00                       # Specify time taken to run your script
+#SBATCH --partition=hm                         # Specify partition (cpu, gpu, hm)
+##SBATCH --reservation=hpcws
+
+ulimit -s unlimited
+
+./$1
+
+#+end_src
+
+
+* arrayAddition
+** code
+#+begin_src C :tangle arrayAddition.c
+#include<stdio.h>
+#include<omp.h>
+#include<stdlib.h>
+#define T 16
+
+int main(){
+    long long N = 10000000000;
+    long long *a, *b, *c, *cs;
+    a = (long long *) malloc(sizeof(long long) * N);
+    b = (long long *) malloc(sizeof(long long) * N);
+    c = (long long *) malloc(sizeof(long long) * N);
+    cs = (long long *) malloc(sizeof(long long) * N);
+    for(long long i = 0; i < N; i++){
+        a[i] = i + 1;
+        b[i] = i + 1;
+        c[i] = 0;
+        cs[i] = 0;
+    }
+    int chunk = N/T;
+    double startTime = omp_get_wtime();
+    #pragma omp parallel for num_threads(T) schedule(dynamic, chunk)
+    for(long long i = 0; i < N; i++){
+        c[i] = a[i] + b[i];
+    }
+    double endTime = omp_get_wtime();
+    double parallelTime = endTime - startTime;
+
+    startTime = omp_get_wtime();
+    for(long long i = 0; i < N; i++){
+        cs[i] = a[i] + b[i];
+    }
+    endTime = omp_get_wtime();
+    double serialTime = endTime - startTime;
+    for(long long i = N - 5; i < N; i++){
+        printf("%lld ", c[i]);
+    }
+    printf("\nSerial time = %lf\n", serialTime);
+    printf("\nParallel time = %lf\n", parallelTime);
+
+    free(a);
+    free(b);
+    free(c);
+    free(cs);
+
+    return 0;
+}
+
+#+end_src
+
+** compile
+#+begin_src bash :session gcc14 :results output 
+gcc arrayAddition.c -o arrayAddition.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh arrayAddition.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1161323
+
+
+
+
+* reduction
+** code
+#+begin_src C :tangle reduction.c
+#include<stdio.h>
+#include<omp.h>
+#define T 13
+int main(){
+    long long N = 1000000000;
+    long long sum = 0;
+    double startTime = omp_get_wtime();
+    for(long long i = 0; i < N; i++){
+        sum += i + 1;
+    }
+    double endTime = omp_get_wtime();
+    printf("Serial time = %lf\n", endTime - startTime);
+    startTime = omp_get_wtime();
+    sum = 0;
+    #pragma omp parallel for reduction(+ : sum) num_threads(T)
+    for(long long i = 0; i < N; i++){
+        sum += i + 1;
+    }
+    endTime = omp_get_wtime();
+
+    printf("Parallel time = %lf\n", endTime - startTime);
+    printf("Calculated sum = %lld\n", sum);
+    long long expectedSum = (N * ((N + 1)) / 2);
+    printf("Expected sum = %lld\n", expectedSum);
+    if(sum == expectedSum){
+        printf("_____Passed_____\n");
+    }
+    else printf("_____Failed_____\n");
+
+    return 0;
+}
+
+#+end_src
+
+** compile
+#+begin_src bash :session gcc14 :results output 
+gcc reduction.c -o reduction.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh reduction.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1161390
+
+
+
+* firstprivate
+** code
+#+begin_src C :tangle firstprivate.c 
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    int a = 5;
+    #pragma omp parallel firstprivate(a) num_threads(4)
+    {
+        printf("Inside: a = %d by tid %d : %p\n", a, omp_get_thread_num(), &a);
+    }
+    printf("After: a = %d : %p\n", a, &a);
+    return 0;
+}
+
+#+end_src
+
+** compile
+#+begin_src bash :session gcc14 :results output 
+gcc firstprivate.c -o firstprivate.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh firstprivate.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1161390
+
+
+
+* lastprivate
+** code
+#+begin_src C :tangle lastprivate.c 
+#include<stdio.h>
+#include<omp.h>
+#define T 10
+#define N 20
+int main(){
+    int a = 5;
+    #pragma omp parallel for lastprivate(a) num_threads(T)
+    for(int i = 0; i < N; i++){
+        if(i == N - 1){
+            continue;
+        }
+        a = i;
+        printf("thread %d is changing a to %d\n", omp_get_thread_num(), a);
+    }
+    printf("a = %d\n", a);
+
+    return 0;
+}
+
+#+end_src
+
+** compile
+#+begin_src bash :session gcc14 :results output 
+gcc lastprivate.c -o lastprivate.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh lastprivate.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1161390
+
+
+
+* private
+** code
+#+begin_src C :tangle private.c 
+
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    int a = 5;
+    #pragma omp parallel private(a) num_threads(4)
+    {
+        printf("Inside: a = %d by tid %d\n", a, omp_get_thread_num());
+    }
+    printf("After: a = %d\n", a);
+    return 0;
+}
+
+#+end_src
+
+** compile
+#+begin_src bash :session gcc14 :results output 
+gcc private.c -o private.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh private.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1161390
+
+
+* conditionalCompillation
+** code
+#+begin_src C :tangle conditionalCompillation.c 
+#include<stdio.h>
+#ifdef _OPENMP
+#include<omp.h>
+#endif
+#include<stdlib.h>
+#define N 100000000
+#define T 13
+
+int main(){
+    int *a, *b, *c, *cs;
+    a = (int *) malloc(sizeof(int) * N);
+    b = (int *) malloc(sizeof(int) * N);
+    c = (int *) malloc(sizeof(int) * N);
+    cs = (int *) malloc(sizeof(int) * N);
+    for(int i = 0; i < N; i++){
+        a[i] = i + 1;
+        b[i] = i + 1;
+        c[i] = 0;
+        cs[i] = 0;
+    }
+
+    #ifdef _OPENMP
+    omp_set_num_threads(T);
+    #endif
+
+    #pragma omp parallel for
+    for(int i = 0; i < N; i++){
+        c[i] = a[i] + b[i];
+    }
+
+    for(int i = N - 5; i < N; i++){
+        printf("%d ", c[i]);
+    }
+
+    free(a);
+    free(b);
+    free(c);
+    free(cs);
+
+    return 0;
+}
+
+
+#+end_src
+
+** compile
+#+begin_src bash :session gcc14 :results output 
+gcc conditionalCompillation.c -o conditionalCompillation.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh conditionalCompillation.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1161390
+
+
+* manualReduction
+** code
+#+begin_src C :tangle manualReduction.c 
+
+#include<stdio.h>
+#include<omp.h>
+#define N 1000000000
+#define T 13
+int main(){
+    int chunksize = N / T;
+    long long sum[T];
+    #pragma omp parallel num_threads(T)
+    {
+        int tid = omp_get_thread_num();
+        long long localsum = 0;
+        int start = tid * chunksize;
+        int end = start + chunksize;
+        if(tid == T - 1) end = N;
+        for(int i = start; i < end; i++){
+            localsum += i + 1;
+        }
+        sum[tid] = localsum;
+    }
+
+    long long totalSum = 0;
+    for(int i = 0; i < T; i++) totalSum += sum[i];
+
+    printf("Calculated sum = %lld\n", totalSum);
+    long long expectedSum = (N * ((N + 1) * 1L) / 2);
+    printf("Expected sum = %lld\n", expectedSum);
+    if(totalSum == expectedSum){
+        printf("_____Passed_____\n");
+    }
+    else printf("_____Failed_____\n");
+
+    return 0;
+}
+
+#+end_src
+
+** compile
+#+begin_src bash :session gcc14 :results output 
+gcc manualReduction.c -o manualReduction.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh manualReduction.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1161390
+
+
+* manualReduction1
+** code
+#+begin_src C :tangle manualReduction1.c 
+
+#include<stdio.h>
+#include<omp.h>
+#define N 1000000000
+#define T 13
+int main(){
+    int chunksize = N / T;
+    long long sum[T];
+    #pragma omp parallel num_threads(T)
+    {
+        int tid = omp_get_thread_num();
+        long long localsum = 0;
+        int start = tid * chunksize;
+        int end = start + chunksize;
+        if(tid == T - 1) end = N;
+        for(int i = start; i < end; i++){
+            localsum += i + 1;
+        }
+        sum[tid] = localsum;
+    }
+
+    long long totalSum = 0;
+    for(int i = 0; i < T; i++) totalSum += sum[i];
+
+    printf("Calculated sum = %lld\n", totalSum);
+    long long expectedSum = (N * ((N + 1) * 1L) / 2);
+    printf("Expected sum = %lld\n", expectedSum);
+    if(totalSum == expectedSum){
+        printf("_____Passed_____\n");
+    }
+    else printf("_____Failed_____\n");
+
+    return 0;
+}
+
+#+end_src
+
+** compile
+#+begin_src bash :session gcc14 :results output 
+gcc manualReduction1.c -o manualReduction1.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh manualReduction1.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1161390
+
+
+* barrier
+** code
+#+begin_src C :tangle barrier.c 
+#include<stdio.h>
+#include<unistd.h>
+#include<omp.h>
+#define T 5
+int main(){
+    #pragma omp parallel num_threads(T)
+    {
+        printf("Before barrier\n");
+        #pragma omp barrier
+        printf("After barrier\n");
+    }
+
+    return 0;
+}
+
+
+#+end_src
+
+** compile
+#+begin_src bash :session gcc14 :results output 
+gcc barrier.c -o barrier.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh barrier.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1161390
+
+
+* critical
+** code
+#+begin_src C :tangle critical.c 
+
+#include<stdio.h>
+#include<omp.h>
+#include<stdlib.h>
+#define N 10000
+#define T 10
+int main(){
+    int sum = 0;
+    #pragma omp parallel for num_threads(10)
+    for(int i = 0; i < N; i++){
+        #pragma omp critical
+        {
+            sum+= i + 1;
+        }
+    }
+    printf("Sum = %d\n", sum);
+
+    return 0;
+}
+
+
+#+end_src
+
+** compile
+#+begin_src bash :session gcc14 :results output 
+gcc critical.c -o critical.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh critical.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1161390
+
+
+* dynamic
+** code
+#+begin_src C :tangle dynamic.c 
+
+#include<stdio.h>
+#include<omp.h>
+#define N 20
+#define T 6
+int main(){
+    #pragma omp parallel for schedule(dynamic, 3) num_threads(T)
+    for(int i = 0; i < N; i++){
+        printf("thread\t%d\t:\ti\t%d\n", omp_get_thread_num(), i);
+    }
+}
+
+#+end_src
+
+** compile
+#+begin_src bash :session gcc14 :results output 
+gcc dynamic.c -o dynamic.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh dynamic.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1161390
+
+
+* dynamic1
+** code
+#+begin_src C :tangle dynamic1.c 
+
+#include<stdio.h>
+#include<omp.h>
+#define N 10
+#define T 5
+int main(){
+    int a[N] = {1343, 100, 500000, 322, 4444, 544, 300, 70000000, 400, 3244};
+    #pragma omp parallel for schedule(dynamic, 1) num_threads(T)
+    for(int i = 0; i < N; i++){
+        printf("iteration i = %d is assigned to %d\n", i, omp_get_thread_num());
+        for(int j = 0; j < a[i]; j++);
+    }
+}
+
+#+end_src
+
+** compile
+#+begin_src bash :session gcc14 :results output 
+gcc dynamic1.c -o dynamic1.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh dynamic1.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1161390
+
+
+* matrixAddition
+** code
+#+begin_src C :tangle matrixAddition.c
+#include<stdio.h>
+#include<omp.h>
+#include<stdlib.h>
+#define N 10000
+#define T 13
+
+int main(){
+    int **a, **b, **c;
+    a = (int**) malloc(sizeof(int*) * N);
+    b = (int**) malloc(sizeof(int*) * N);
+    c = (int**) malloc(sizeof(int*) * N);
+
+    for(int i = 0; i < N; i++){
+        a[i] = (int*) malloc(sizeof(int) * N);
+        b[i] = (int*) malloc(sizeof(int) * N);
+        c[i] = (int*) malloc(sizeof(int) * N);
+    }
+
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
+            a[i][j] = i + 1;
+            b[i][j] = i + 1;
+            c[i][j] = 0;
+        }
+    }
+
+    double startTime = omp_get_wtime();
+    #pragma omp parallel for num_threads(T)
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
+            c[i][j] = a[i][j] + b[i][j];
+        }
+    }
+    double endTime = omp_get_wtime();
+    double parallelTime = endTime - startTime;
+
+    /*
+    for(int i = N - 1; i < N; i++){
+        for(int j = N - 50; j < N; j++){
+            printf("%d\t", c[i][j]);
+        }
+        printf("\n");
+    }
+    */
+
+    printf("%lf\n", parallelTime);
+
+    for(int i = 0; i < N; i++){
+        free(a[i]);
+        free(b[i]);
+        free(c[i]);
+    }
+    free(a);
+    free(b);
+    free(c);
+
+    return 0;
+}
+
+#+end_src
+
+** compile
+#+begin_src bash :session gcc14 :results output 
+gcc matrixAddition.c -o matrixAddition.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh matrixAddition.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1161323
+
+
+
+
+* atomic
+** code
+#+begin_src C :tangle atomic.c
+#include<stdio.h>
+#include<omp.h>
+#include<stdlib.h>
+#define N 100000000
+#define T 10
+int main(){
+    long long  csum = 0, asum = 0;
+    double startCritical = omp_get_wtime();
+    #pragma omp parallel for num_threads(10)
+    for(long long i = 0; i < N; i++){
+        #pragma omp critical
+        {
+            csum+= i + 1;
+        }
+    }
+    double endCritical = omp_get_wtime();
+
+    double startAtomic = omp_get_wtime();
+    #pragma omp parallel for num_threads(10)
+    for(long long i = 0; i < N; i++){
+        #pragma omp atomic
+        asum+= i + 1;
+    }
+    double endAtomic = omp_get_wtime();
+    printf("Time taken by critical section : %lf\n", endCritical - startCritical);
+    printf("Critical sum : %lld\n", csum);
+    printf("Time taken by atomic: %lf\n", endAtomic - startAtomic);
+    printf("Atomic sum : %lld\n", asum);
+
+    return 0;
+}
+
+#+end_src
+
+** compile
+#+begin_src bash :session gcc14 :results output 
+gcc atomic.c -o atomic.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh atomic.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1161323
+
+
+
+* section
+** code
+#+begin_src C :tangle section.c
+#include<stdio.h>
+#include<omp.h>
+#define N 10000
+#define T 10
+int main(){
+    #pragma omp parallel num_threads(3)
+    {
+        #pragma omp sections
+        {
+            #pragma omp section
+            {
+                printf("This section is executed by thread %d\n", omp_get_thread_num());
+            }
+            #pragma omp section
+            {
+                printf("This section is executed by thread %d\n", omp_get_thread_num());
+            }
+            #pragma omp section
+            {
+                printf("This section is executed by thread %d\n", omp_get_thread_num());
+            }
+            #pragma omp section
+            {
+                printf("This section is executed by thread %d\n", omp_get_thread_num());
+            }
+        }
+    }
+}
+
+
+#+end_src
+
+** compile
+#+begin_src bash :session gcc14 :results output 
+gcc section.c -o section.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh section.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1161323
+
+
+
+* taskParallelism
+** code
+#+begin_src C :tangle taskParallelism.c
+#include<stdio.h>
+#include<omp.h>
+#include<stdlib.h>
+#define N 1000000
+#define T 10
+int main(){
+    long long *a;
+    long long sum = 0, sumSquare = 0;
+    a = (long long*) malloc(sizeof(long long) * N);
+    for(int i = 0; i < N; i++){
+        a[i] = i + 1;
+    }
+    double startTime = omp_get_wtime();
+    #pragma omp parallel num_threads(T)
+    {
+        #pragma omp sections
+        {
+            #pragma omp section
+            {
+                for(int i = 0; i < N; i++){
+                    sum+= a[i];
+                }
+            }
+            #pragma omp section
+            {
+                for(int i = 0; i < N; i++){
+                    sumSquare += a[i] * a[i];
+                }
+            }
+        }
+    }
+    double endTime = omp_get_wtime();
+    printf("Sum = %lld\n", sum);
+    printf("Sum of Squares = %lld\n", sumSquare);
+    printf("Execution time = %lf\n", endTime - startTime);
+    free(a);
+}
+
+#+end_src
+
+** compile
+#+begin_src bash :session gcc14 :results output 
+gcc taskParallelism.c -o taskParallelism.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh taskParallelism.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1161323
+
+
+* taskParallelism1
+** code
+#+begin_src C :tangle taskParallelism1.c
+#include<stdio.h>
+#include<omp.h>
+#include<stdlib.h>
+#define N 1000000
+#define T 10
+int main(){
+    long long *a;
+    long long sum = 0, sumSquare = 0;
+    a = (long long*) malloc(sizeof(long long) * N);
+    for(int i = 0; i < N; i++){
+        a[i] = i + 1;
+    }
+    omp_set_nested(1);
+    double startTime = omp_get_wtime();
+    #pragma omp parallel num_threads(T)
+    {
+        #pragma omp sections
+        {
+            #pragma omp section
+            {
+                #pragma omp parallel for reduction(+ : sum) num_threads(T)
+                for(int i = 0; i < N; i++){
+                    sum+= a[i];
+                }
+            }
+            #pragma omp section
+            {
+                #pragma omp parallel for reduction(+ : sumSquare) num_threads(T)
+                for(int i = 0; i < N; i++){
+                    sumSquare += a[i] * a[i];
+                }
+            }
+        }
+    }
+    double endTime = omp_get_wtime();
+    printf("Sum = %lld\n", sum);
+    printf("Sum of Squares = %lld\n", sumSquare);
+    printf("Execution time = %lf\n", endTime - startTime);
+    free(a);
+}
+
+#+end_src
+
+** compile
+#+begin_src bash :session gcc14 :results output 
+gcc taskParallelism1.c -o taskParallelism1.out -fopenmp
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh taskParallelism1.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1161323
+
+
+* pi
+#+begin_src C :tangle pi.c
+#include<stdio.h>
+#include<stdlib.h>
+#include<math.h>
+#include<sys/time.h>
+#include<omp.h>
+
+//#define N 9999999999
+
+int main()
+{
+    long long i, N = 9999999999;
+    double area, pi;
+    double dx, y, x;
+    double exe_time;
+    struct timeval stop_time, start_time;
+
+    dx = 1.0 / N;
+    area = 0.0;
+
+    gettimeofday(&start_time, NULL);
+
+    //#pragma omp parallel for private(x, y) reduction(+:area) num_threads(20)
+    for(i = 0; i < N; i++){
+        x = i * dx;
+        y = sqrt(1 - x*x);
+        area += y * dx;
+    }
+
+    gettimeofday(&stop_time, NULL);
+
+    exe_time = (stop_time.tv_sec + (stop_time.tv_usec / 1000000.0)) -
+               (start_time.tv_sec + (start_time.tv_usec / 1000000.0));
+
+    pi = 4.0 * area;
+
+    printf("\n Value of pi is = %.16lf\n Execution time is = %lf seconds\n", pi, exe_time);
+
+    return 0;
+}
+
+#+end_src
+
+#+begin_src bash :session gcc14 :results output 
+gcc -fopenmp -lm pi.c -o pi.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh pi.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1163755
+
+
+* prime count serial
+#+begin_src C :tangle primeCount.c
+#include<stdio.h>
+#include<stdlib.h>
+#include<math.h>
+#include<time.h>
+#include<sys/time.h>
+
+#define N 1000000
+/*
+                N  PRIME_NUMBER
+
+                1           0
+               10           4
+              100          25
+            1,000         168
+           10,000       1,229
+          100,000       9,592
+        1,000,000      78,498
+       10,000,000     664,579
+      100,000,000   5,761,455
+    1,000,000,000  50,847,534
+
+*/
+
+int main()
+{
+	int i, j;
+	int count, flag;
+	double exe_time;
+	struct timeval stop_time, start_time;
+
+	count = 1; // 2 is prime. Our loop starts from 3
+
+	gettimeofday(&start_time, NULL);
+
+
+	for(i=3;i<N;i++)
+	{
+	 	flag = 0;
+		for(j=2;j<i;j++)
+	    {
+		    if((i%j) == 0)
+		    {
+			    flag = 1;
+			    break;
+		    }
+	    }
+        if(flag == 0)
+        {
+        	count++;
+        }
+	}
+
+	gettimeofday(&stop_time, NULL);
+	exe_time = (stop_time.tv_sec+(stop_time.tv_usec/1000000.0)) - (start_time.tv_sec+(start_time.tv_usec/1000000.0));
+
+	printf("\n Number of prime numbers = %d \n Execution time is = %lf seconds\n", count, exe_time);
+
+}
+
+#+end_src
+
+#+begin_src bash :session gcc14 :results output 
+gcc -fopenmp -lm primeCount.c -o primeCount.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh primeCount.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1163793
+
+* prime count parallel
+#+begin_src C :tangle primeCount_parallel.c
+#include<stdio.h>
+#include<stdlib.h>
+#include<math.h>
+#include<time.h>
+#include<sys/time.h>
+#include<omp.h>
+
+#define N 1000000
+
+int main()
+{
+    int i, j;
+    int count, flag;
+    double exe_time;
+    struct timeval stop_time, start_time;
+
+    count = 1; // Counting '2' as prime
+
+    gettimeofday(&start_time, NULL);
+
+    #pragma omp parallel for private(j, flag) reduction(+:count) schedule(dynamic, 100)
+    for(i = 3; i < N; i++)
+    {
+        flag = 0;
+        for(j = 2; j*j <= i; j++)   // <-- Small optimization: Only check till sqrt(i)
+        {
+            if(i % j == 0)
+            {
+                flag = 1;
+                break;
+            }
+        }
+        if(flag == 0)
+        {
+            count++;
+        }
+    }
+
+    gettimeofday(&stop_time, NULL);
+
+    exe_time = (stop_time.tv_sec + (stop_time.tv_usec/1000000.0)) -
+               (start_time.tv_sec + (start_time.tv_usec/1000000.0));
+
+    printf("\n Number of prime numbers = %d", count);
+    printf("\n Execution time is = %lf seconds\n", exe_time);
+
+    return 0;
+}
+
+#+end_src
+
+#+begin_src bash :session gcc14 :results output 
+gcc -fopenmp -lm primeCount_parallel.c -o primeCount_parallel.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session gcc14 :results output 
+sbatch script.sh primeCount_parallel.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1163799

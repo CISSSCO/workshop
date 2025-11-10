@@ -5,8 +5,8 @@
 #SBATCH --output=%J.out                         # Name of your output file (%J is replaced with job_id)
 #SBATCH --error=%J.err                          # Name of your error file
 #SBATCH --time=1-00:00:00                       # Specify time taken to run your script
-#SBATCH --partition=cpu                         # Specify partition (cpu, gpu, hm)
-#SBATCH --reservation=hpcws
+#SBATCH --partition=hm                         # Specify partition (cpu, gpu, hm)
+##SBATCH --reservation=hpcws
 
 ulimit -s unlimited
 

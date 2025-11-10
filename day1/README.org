@@ -1,7 +1,7 @@
 #+TITLE: Parallel Programming Using OpenMP
 #+AUTHOR: Abhishek Raj
 #+DATE: 2025-11-08
-
+[[github.com/CISSSCO/workshop.git][github.com/CISSSCO/workshop.git]]
 * Setting up environment
 ** compile
 #+begin_src bash :session gcc14 :results output 
@@ -163,18 +163,19 @@ int main(){
 * Compile and Run C
 #+begin_src bash :session gcc14 :results output
 #gcc --version
-gcc hello.c -o hello.out -fopenmp
+gcc hello.c -o hello.out 
 #+end_src
 
 #+RESULTS:
 
 #+begin_src bash :session gcc14 :results output
 #gcc --version
-sbatch script.sh hello.out
+./hello.out
+#sbatch script.sh hello.out
 #+end_src
 
 #+RESULTS:
-: Submitted batch job 1160195
+: Hello, World
 
 * Hello World in OpenMP
 #+begin_src C :tangle hello_omp.c
@@ -197,9 +198,93 @@ gcc hello_omp.c -o hello_omp.out -fopenmp
 #+RESULTS:
 
 #+begin_src bash :session gcc14 :results output
-sbatch script.sh hello_omp.out
-#./hello_omp.out
+#sbatch script.sh hello_omp.out
+./hello_omp.out
 #+end_src
+
+#+RESULTS:
+#+begin_example
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+Hello, World
+#+end_example
 
 
 * Part 2
@@ -225,7 +310,7 @@ sbatch script.sh hello_omp.out
 #SBATCH --error=%J.err                          # Name of your error file
 #SBATCH --time=1-00:00:00                       # Specify time taken to run your script
 #SBATCH --partition=cpu                         # Specify partition (cpu, gpu, hm)
-#SBATCH --reservation=hpcws
+#SBATCH --reservation=hpcws.user
 
 ulimit -s unlimited
 
@@ -315,7 +400,7 @@ export OMP_NUM_THREADS=4
 
 ** Using Runtime Routine
 #+begin_src C
-omp_set_num_threads(4);
+omp_set_num_threads(7);
 #+end_src
 
 * Assigning Number of Threads — Order of Precedence
@@ -333,7 +418,7 @@ If all are present → clause takes highest precedence.
 #include<omp.h>
 int main(){
     //omp_set_num_threads(2);
-    #pragma omp parallel num_threads(7)
+    #pragma omp parallel 
     {
         //omp_get_thread_num();
         printf("Hello, World \n" );
