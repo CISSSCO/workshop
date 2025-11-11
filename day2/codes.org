@@ -1,0 +1,244 @@
+#+title: Codes
+
+
+* Scripts
+** compile script
+#+begin_src bash :session openmpi :results output
+source /scratch/$USER/spack/share/spack/setup-env.sh
+spack load gcc/6qthuq2
+spack load openmpi
+#+end_src
+
+#+RESULTS:
+
+
+** run script
+#+begin_src bash :session openmpi :tangle script.sh
+#!/bin/bash
+#SBATCH -N 1                                    # Nodes = 1
+#SBATCH --ntasks-per-node=40                    # Tasks on each node = 40 
+#SBATCH --job-name=omp                          # Specify job name
+#SBATCH --output=%J.out                         # Name of your output file (%J is replaced with job_id)
+#SBATCH --error=%J.err                          # Name of your error file
+#SBATCH --time=1-00:00:00                       # Specify time taken to run your script
+#SBATCH --partition=cpu                         # Specify partition (cpu, gpu, hm)
+#SBATCH --reservation=hpcws
+
+ulimit -s unlimited
+
+module load gnu8/8.3.0
+module load openmpi/4.1.1
+
+if [ $# -eq 2 ]; then
+    SLURM_NTASKS=$2
+fi
+   
+
+cmd="mpirun -np $SLURM_NTASKS $1"
+echo "------------------------------------------------------------------"
+echo "Command executed: $cmd"
+echo "------------------------------------------------------------------"
+echo "##################################################################"
+echo "##########                    OUTPUT                    ##########"
+echo "##################################################################"
+echo
+mpirun -np $SLURM_NTASKS $1
+echo
+echo "##################################################################"
+echo "##########                     DONE                     ##########"
+echo "##################################################################"
+
+#+end_src
+
+** run script
+#+begin_src bash :session openmpi :tangle script_serial.sh
+#!/bin/bash
+#SBATCH -N 1                                    # Nodes = 1
+#SBATCH --ntasks-per-node=40                    # Tasks on each node = 40 
+#SBATCH --job-name=omp                          # Specify job name
+#SBATCH --output=%J.out                         # Name of your output file (%J is replaced with job_id)
+#SBATCH --error=%J.err                          # Name of your error file
+#SBATCH --time=1-00:00:00                       # Specify time taken to run your script
+#SBATCH --partition=cpu                         # Specify partition (cpu, gpu, hm)
+#SBATCH --reservation=hpcws
+
+ulimit -s unlimited
+
+module load gnu8/8.3.0
+module load openmpi/4.1.1
+
+if [ $# -eq 2 ]; then
+    SLURM_NTASKS=$2
+fi
+   
+
+#cmd="mpirun -np $SLURM_NTASKS $1"
+echo "------------------------------------------------------------------"
+echo "Command executed: $cmd"
+echo "------------------------------------------------------------------"
+echo "##################################################################"
+echo "##########                    OUTPUT                    ##########"
+echo "##################################################################"
+echo
+#mpirun -np $SLURM_NTASKS $1
+./$1
+echo
+echo "##################################################################"
+echo "##########                     DONE                     ##########"
+echo "##################################################################"
+
+#+end_src
+
+** run script
+#+begin_src bash :session openmpi :tangle script_multinode.sh
+#!/bin/bash
+#SBATCH -N 8                                    # Nodes = 1
+#SBATCH --ntasks-per-node=40                    # Tasks on each node = 40 
+#SBATCH --job-name=mpi                          # Specify job name
+#SBATCH --output=%J.out                         # Name of your output file (%J is replaced with job_id)
+#SBATCH --error=%J.err                          # Name of your error file
+#SBATCH --time=1-00:00:00                       # Specify time taken to run your script
+#SBATCH --partition=cpu                         # Specify partition (cpu, gpu, hm)
+#SBATCH --qos=nsm
+#SBATCH --reservation=hpcws
+
+ulimit -s unlimited
+
+module load gnu8/8.3.0
+module load openmpi/4.1.1
+
+if [ $# -eq 2 ]; then
+    SLURM_NTASKS=$2
+fi
+   
+
+cmd="mpirun -np $SLURM_NTASKS $1"
+echo "------------------------------------------------------------------"
+echo "Command executed: $cmd"
+echo "------------------------------------------------------------------"
+echo "##################################################################"
+echo "##########                    OUTPUT                    ##########"
+echo "##################################################################"
+echo
+mpirun -np $SLURM_NTASKS $1
+echo
+echo "##################################################################"
+echo "##########                     DONE                     ##########"
+echo "##################################################################"
+
+#+end_src
+
+
+* pi serial
+#+begin_src C :tangle pi_serial.c
+#include<stdio.h>
+#include<stdlib.h>
+#include<math.h>
+#include<sys/time.h>
+int main()
+{
+    const long long N = 999999999999;
+	long long i, j;
+	double area, pi;
+	double dx, y, x;
+	double exe_time;
+	struct timeval stop_time, start_time;
+	dx = (1.0 * 1L)/N;
+	x = 0.0;
+	area = 0.0;
+    gettimeofday(&start_time, NULL);
+    for(i=0;i<N;i++){
+        x = i*dx;
+        y = sqrt(1-x*x);
+        area += y*dx;
+    }
+	gettimeofday(&stop_time, NULL);
+	exe_time = (stop_time.tv_sec+(stop_time.tv_usec/1000000.0)) - (start_time.tv_sec+(start_time.tv_usec/1000000.0));
+	pi = 4.0*area;
+	printf("\n Value of pi is = %.16lf\n Execution time is = %lf seconds\n", pi, exe_time);
+    return 0;
+}
+
+#+end_src
+
+
+#+begin_src bash :session openmpi :results output :exports both
+gcc pi_serial.c -o pi_serial.out -lm
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script_serial.sh ./pi_serial.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1166094
+
+* pi parallel
+#+begin_src C :tangle pi_parallel.c
+#include<stdio.h>
+#include<mpi.h>
+#include<stdlib.h>
+#include<math.h>
+#include<sys/time.h>
+int main()
+{
+    MPI_Init(NULL, NULL);
+    const long long N = 999999999999;
+	long long i, j;
+	double area, pi;
+	double dx, y, x;
+	double exe_time;
+	struct timeval stop_time, start_time;
+	dx = 1.0/N;
+	x = 0.0;
+	area = 0.0;
+    int rank, size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    long long chunksize = N / size;
+    long long start = rank * chunksize;
+    long long end = start + chunksize;
+    if(rank == size - 1) end = N;
+    if(rank == 0)
+        gettimeofday(&start_time, NULL);
+    for(i=start;i<end;i++){
+        x = i*dx;
+        y = sqrt(1-x*x);
+        area += y*dx;
+    }
+    double finalarea;
+    MPI_Reduce(&area, &finalarea, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    if(rank == 0){
+        gettimeofday(&stop_time, NULL);
+        exe_time = (stop_time.tv_sec+(stop_time.tv_usec/1000000.0)) - (start_time.tv_sec+(start_time.tv_usec/1000000.0));
+        pi = 4.0*finalarea;
+        printf("\n Value of pi is = %.16lf\n Execution time is = %lf seconds\n", pi, exe_time);
+    }
+    MPI_Finalize();
+    return 0;
+}
+
+#+end_src
+
+
+#+begin_src bash :session openmpi :results output :exports both
+mpicc pi_parallel.c -o pi_parallel.out -lm
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./pi_parallel.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1166095
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script_multinode.sh ./pi_parallel.out
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1166097

@@ -1,0 +1,34 @@
+==========================================
+SLURM_CLUSTER_NAME = param-shivay
+SLURM_ARRAY_JOB_ID = 
+SLURM_ARRAY_TASK_ID = 
+SLURM_ARRAY_TASK_COUNT = 
+SLURM_ARRAY_TASK_MAX = 
+SLURM_ARRAY_TASK_MIN = 
+SLURM_JOB_ACCOUNT = others
+SLURM_JOB_ID = 1166097
+SLURM_JOB_NAME = mpi
+SLURM_JOB_NODELIST = cn[004-005,013-018]
+SLURM_JOB_USER = abhishekraj.cdac
+SLURM_JOB_UID = 6573
+SLURM_JOB_PARTITION = cpu
+SLURM_TASK_PID = 75093
+SLURM_SUBMIT_DIR = /home/abhishekraj.cdac/git/workshop/day2
+SLURM_CPUS_ON_NODE = 40
+SLURM_NTASKS = 320
+SLURM_TASK_PID = 75093
+==========================================
+------------------------------------------------------------------
+Command executed: mpirun -np 320 ./pi_parallel.out
+------------------------------------------------------------------
+##################################################################
+##########                    OUTPUT                    ##########
+##################################################################
+
+
+ Value of pi is = 3.1415926535780274
+ Execution time is = 26.446843 seconds
+
+##################################################################
+##########                     DONE                     ##########
+##################################################################

@@ -1,0 +1,1542 @@
+#+TITILE: MPI
+#+AUTHOR: Abhishek Raj
+#+DATE: 2025-11-08
+
+[[github.com/CISSSCO/workshop.git][github.com/CISSSCO/workshop.git]]
+
+* Scripts
+** compile script
+#+begin_src bash :session openmpi :results output
+source /scratch/$USER/spack/share/spack/setup-env.sh
+spack load gcc/6qthuq2
+spack load openmpi
+#+end_src
+
+#+RESULTS:
+
+
+** run script
+#+begin_src bash :session openmpi :tangle script.sh
+#!/bin/bash
+#SBATCH -N 1                                    # Nodes = 1
+#SBATCH --ntasks-per-node=40                    # Tasks on each node = 40 
+#SBATCH --job-name=omp                          # Specify job name
+#SBATCH --output=%J.out                         # Name of your output file (%J is replaced with job_id)
+#SBATCH --error=%J.err                          # Name of your error file
+#SBATCH --time=1-00:00:00                       # Specify time taken to run your script
+#SBATCH --partition=cpu                         # Specify partition (cpu, gpu, hm)
+#SBATCH --reservation=hpcws
+
+ulimit -s unlimited
+
+module load gnu8/8.3.0
+module load openmpi/4.1.1
+
+if [ $# -eq 2 ]; then
+    SLURM_NTASKS=$2
+fi
+   
+
+cmd="mpirun -np $SLURM_NTASKS $1"
+echo "------------------------------------------------------------------"
+echo "Command executed: $cmd"
+echo "------------------------------------------------------------------"
+echo "##################################################################"
+echo "##########                    OUTPUT                    ##########"
+echo "##################################################################"
+echo
+mpirun -np $SLURM_NTASKS $1
+echo
+echo "##################################################################"
+echo "##########                     DONE                     ##########"
+echo "##################################################################"
+
+#+end_src
+
+* Introduction to MPI
+MPI (Message Passing Interface) is a standardized library for message-passing in parallel programming. It allows multiple processes to communicate and coordinate tasks across distributed-memory systems. MPI is widely used for high-performance computing applications.
+
+- **Key Highlights**:
+  - Enables communication between processes running on different nodes or cores.
+  - Portable across various hardware and software platforms.
+  - Scalable to thousands or even millions of processes.
+  - Provides fine-grained control over communication patterns.
+
+* Basics of MPI
+- **Processes**:
+  - Each instance of an MPI program is a separate process.
+  - Processes do not share memory and communicate explicitly via messages.
+
+- **Communicator**:
+  - A group of processes that can communicate with each other.
+  - The default communicator `MPI_COMM_WORLD` includes all processes.
+
+- **Rank**:
+  - Each process in a communicator is assigned a unique **rank** (an integer).
+  - Ranks are used to identify and address processes.
+
+- **Execution Model**:
+  - All processes start execution from the same program code.
+  - They can follow different execution paths based on their rank.
+
+---
+
+* Processes vs Threads
+| **Feature**              | **Processes**                     | **Threads**                           |
+|---------------------------|------------------------------------|---------------------------------------|
+| Memory                    | Separate memory for each process. | Shared memory within the process.     |
+| Communication             | Message passing (explicit).       | Shared variables (implicit).          |
+| Scalability               | Highly scalable.                  | Limited by shared memory capacity.    |
+| Example                   | MPI programs.                     | OpenMP programs.                      |
+
+---
+
+* Distributed Memory Programming Model
+- In distributed memory systems, processes execute on separate nodes, each with its own private memory.
+- Communication between processes occurs explicitly using message-passing.
+
+- **Key Characteristics**:
+  - No shared memory: Processes cannot directly access each other’s data.
+  - Explicit communication: Processes exchange data via messages.
+  - Suitable for large-scale distributed systems like clusters and supercomputers.
+
+---
+
+* Distributed vs Shared Memory
+| **Feature**              | **Shared Memory**                      | **Distributed Memory**                |
+|---------------------------|----------------------------------------|---------------------------------------|
+| **Memory Access**         | All threads share a global memory.     | Each process has private memory.      |
+| **Communication**         | Implicit via shared variables.         | Explicit via message passing.         |
+| **Programming Models**    | OpenMP, Pthreads.                      | MPI, Sockets.                         |
+| **Scalability**           | Limited by shared memory size.         | Highly scalable for large systems.    |
+
+---
+
+* Why MPI?
+1. **Scalability**:
+   - Handles thousands of processes efficiently on distributed systems.
+
+2. **Portability**:
+   - Works on diverse hardware architectures and operating systems.
+
+3. **Flexibility**:
+   - Provides control over data distribution, load balancing, and communication.
+
+4. **Efficiency**:
+   - Optimized for high-performance computing on clusters and supercomputers.
+
+* Real-World Applications of MPI
+- Climate modeling.
+- Computational fluid dynamics.
+- Genome sequencing.
+- Financial simulations.
+
+---
+
+* How MPI Works
+1. **Initialization**:
+   - The MPI environment is set up using `MPI_Init`.
+   - All processes start executing from the same program.
+
+2. **Communication**:
+   - Processes exchange data via point-to-point or collective communication.
+   - Use communicators (e.g., `MPI_COMM_WORLD`) to define the scope of communication.
+
+3. **Synchronization**:
+   - Processes can synchronize using barriers or other mechanisms.
+
+4. **Finalization**:
+   - The MPI environment is cleaned up using `MPI_Finalize`.
+
+---
+
+* MPI Communications
+- **Point-to-Point Communication**:
+  - Direct communication between two specific processes.
+  - Example Functions:
+    - `MPI_Send`: Sends a message.
+    - `MPI_Recv`: Receives a message.
+
+- **Collective Communication**:
+  - Involves all processes in a communicator.
+  - Example Functions:
+    - `MPI_Bcast`: Broadcasts a message to all processes.
+    - `MPI_Reduce`: Combines data from all processes.
+
+* Downloading and Installing MPI
+To get started with MPI, you need to download and install an MPI implementation. Here are general steps for downloading and installing Open MPI:
+1. **Download Open MPI**:
+   Visit the [Open MPI website](https://www.open-mpi.org) and download the latest version of Open MPI.
+2. **Extract the tarball**:
+   #+BEGIN_src bash :session openmpi :session openmpi
+   tar -xvf openmpi-x.y.z.tar.gz
+   cd openmpi-x.y.z
+   #+END_SRC
+3. **Configure, Build, and Install**:
+   #+BEGIN_src bash :session openmpi :session openmpi
+   ./configure --prefix=/path/to/install
+   make
+   make install
+   #+END_SRC
+4. **Set Environment Variables**:
+   Add the following lines to your `.bashrc` or `.bash_profile`:
+   #+BEGIN_src bash :session openmpi
+   export PATH=/path/to/install/bin:$PATH
+   export LD_LIBRARY_PATH=/path/to/install/lib:$LD_LIBRARY_PATH
+   #+END_SRC
+
+* MPI Hello World Example
+#+begin_src c
+#include <mpi.h>
+#include <stdio.h>
+
+int main() {
+    // Initialize the MPI environment
+    MPI_Init(NULL, NULL);
+
+    // Get the size of the communicator (number of processes)
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+    // Get the rank of the current process
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+
+    // Print a message from each process
+    printf("Hello from process %d of %d\n", world_rank, world_size);
+
+    // Finalize the MPI environment
+    MPI_Finalize();
+    return 0;
+}
+#+end_src
+
+---
+
+* Detailed Explanation of Hello World Code
+1. **MPI_Init**:
+   - Initializes the MPI environment.
+   - Required before calling any other MPI functions.
+   - Syntax:
+     ```c
+     MPI_Init(&argc, &argv);
+     ```
+
+2. **MPI_COMM_WORLD**:
+   - Default communicator that includes all processes in the MPI program.
+   - Every process is part of this communicator.
+
+3. **MPI_Comm_size**:
+   - Retrieves the total number of processes in the communicator.
+   - Syntax:
+     ```c
+     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+     ```
+   - Example:
+     - If there are 4 processes, `world_size` will be `4`.
+
+4. **MPI_Comm_rank**:
+   - Retrieves the rank of the current process in the communicator.
+   - Syntax:
+     ```c
+     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+     ```
+   - Example:
+     - If there are 4 processes, their ranks will be `0`, `1`, `2`, and `3`.
+
+5. **MPI_Finalize**:
+   - Cleans up the MPI environment.
+   - Syntax:
+     ```c
+     MPI_Finalize();
+     ```
+
+---
+
+* Hello World in C
+** code
+#+begin_src C :tangle hello.c
+#include<stdio.h>
+int main(){
+    printf("Hello, World\n");
+    return 0;
+}
+#+end_src
+
+** compile
+#+begin_src bash :session openmpi :results output :exports both
+gcc hello.c -o hello.out
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session openmpi :results output :exports both
+./hello.out
+#+end_src
+
+#+RESULTS:
+: Hello, World
+
+* Hello World in using MPI
+** code
+#+begin_src C :tangle hello1.c
+#include<stdio.h>
+#include<mpi.h>
+int main(){
+    MPI_Init(NULL, NULL);
+    int size;
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    printf("Hello from process %d of %d\n", rank, size);
+    MPI_Finalize();
+    return 0;
+}
+#+end_src
+
+** compile
+#+begin_src bash :session openmpi :results output :exports both
+mpicc hello1.c -o hello1.out
+#+end_src
+
+#+RESULTS:
+
+** run
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./hello1.out 4
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1165884
+
+* task1
+#+begin_src C :tangle task1.c
+#include<stdio.h>
+#include<mpi.h>
+#define N 1000
+int main(){
+    int size, rank;
+    int a[N];
+    MPI_Init(NULL, NULL);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    int chunksize = N / size;
+    int start = rank * chunksize;
+    int end = start + chunksize;
+    if(rank == size - 1) end = N;
+    for(int i = start; i < end; i++){
+        a[i] = i + 1;
+    }
+
+    for(int i = start; i < end; i++){
+        printf("%d ", a[i]);
+    }
+    printf("\n");
+    MPI_Finalize();
+}
+#+end_src
+
+#+begin_src bash :session openmpi :results output :exports both
+mpicc task1.c -o task1.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./task1.out 4 
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1165560
+
+* MPI Communicators
+Communicators in MPI define a group of processes that can communicate with each other. The default communicator is `MPI_COMM_WORLD`, which includes all the processes. Custom communicators can be created to define subgroups of processes for specific communication patterns.
+* Types of MPI Communications
+MPI offers various communication mechanisms to facilitate different types of data exchanges between processes:
+** Point-to-Point Communication:
+  - **Blocking**: The sending and receiving operations wait until the message is delivered (e.g., `MPI_Send`, `MPI_Recv`).
+  - **Non-Blocking**: The operations return immediately, allowing computation and communication to overlap (e.g., `MPI_Isend`, `MPI_Irecv`).
+** Collective Communication:
+  These operations involve a group of processes and include:
+  - **Broadcast**: Send data from one process to all other processes (`MPI_Bcast`).
+  - **Scatter**: Distribute distinct chunks of data from one process to all processes (`MPI_Scatter`).
+  - **Gather**: Collect chunks of data from all processes to one process (`MPI_Gather`).
+  - **All-to-All**: Every process sends and receives distinct chunks of data (`MPI_Alltoall`).
+  Collectives can also include operations like reductions (`MPI_Reduce`, `MPI_Allreduce`) which perform computations on data from all processes and distribute the result.
+
+* Point-to-point communication
+#+begin_src C :tangle p2p_mpi.c
+#include"stdio.h"
+#include"mpi.h"
+
+int main(int argc, char **argv)
+{
+	int myid, size;
+	int myval;
+
+	MPI_Init(&argc,&argv);
+
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+	MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+
+	if(myid==0){
+        myval = 100;
+		printf("\nmyid: %d \t myval = %d", myid, myval);
+		MPI_Send(&myval, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+		printf("\nmyid: %d \t Data sent.\n", myid);
+	}
+	else if(myid==1){	// Process with ID exactly equal to 1
+        myval = 200;
+		MPI_Recv(&myval, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		printf("\nmyid: %d \t Data received.", myid);
+		printf("\nmyid: %d \t myval = %d", myid, myval);
+		printf("\n\nProgram exit!\n");
+	}
+
+	//End MPI environment
+	MPI_Finalize();
+}
+#+end_src
+
+#+begin_src bash :session openmpi :results output :exports both
+mpicc p2p_mpi.c -o p2p_mpi.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./p2p_mpi.out 2
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1165582
+
+
+** Sending array to process 1
+#+begin_src C :tangle p2p_mpi_array7.c
+#include"stdio.h"
+#include"mpi.h"
+#define N 100
+
+int main()
+{
+	int myid, size;
+	int myval;
+
+    int arr[N];
+	//Initialize MPI environment
+	MPI_Init(NULL,NULL);
+
+	//Get total number of processes
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+	//Get my unique ID among all processes
+	MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+
+	// Process with ID exactly equal to 0
+	if(myid==0){
+		//Initialize data to be sent
+        for(int i = 0; i < N; i++) arr[i] = i + 1;
+		//Send data
+		MPI_Send(arr, N, MPI_INT, 1, 0, MPI_COMM_WORLD);
+		printf("\nmyid: %d \t Data sent.\n", myid);
+	}
+	else if(myid==1){	// Process with ID exactly equal to 1
+		//Initializ receive array to some other data
+		MPI_Recv(arr, N, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		printf("\nmyid: %d \t Data received.\n", myid);
+		//Print received data
+        for(int i = 0; i < N; i++)
+          printf("%d ", arr[i]);
+	}
+
+	//End MPI environment
+	MPI_Finalize();
+}
+#+end_src
+
+#+begin_src bash :session openmpi :results output :exports both
+mpicc p2p_mpi_array7.c -o p2p_mpi_array7.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./p2p_mpi_array7.out 2
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1165590
+
+* Point-to-point communication
+#+begin_src C :tangle p2p_mpi7.c
+#include"stdio.h"
+#include"mpi.h"
+
+int main()
+{
+	int myid, size;
+	int myval;
+	MPI_Init(NULL,NULL);
+
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+	MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+
+	if(myid==0){
+        myval = 100;
+		printf("\nmyid: %d \t myval = %d", myid, myval);
+        for(int i = 1; i < size; i++){
+            MPI_Send(&myval, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+        }
+		printf("\nmyid: %d \t Data sent.\n", myid);
+	}
+	else{	// Process with ID exactly equal to 1
+        if(myid == size - 1){
+            printf("I left\n");
+        }
+        else{
+               myval = 200;
+               MPI_Recv(&myval, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+               printf("\nmyid: %d \t Data received.\n", myid);
+               printf("\nmyid: %d \t myval = %d\n", myid, myval);
+        }
+	}
+
+	MPI_Finalize();
+}
+#+end_src
+
+#+begin_src bash :session openmpi :results output :exports both
+mpicc p2p_mpi7.c -o p2p_mpi7.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./p2p_mpi7.out 4
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1165912
+
+
+** Sending array to process 1
+#+begin_src C :tangle p2p_mpi_array9.c
+#include"stdio.h"
+#include"mpi.h"
+#define N 100
+
+int main()
+{
+	int myid, size;
+	int myval;
+
+    int arr[N];
+	//Initialize MPI environment
+	MPI_Init(NULL,NULL);
+
+	//Get total number of processes
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+	//Get my unique ID among all processes
+	MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+
+	// Process with ID exactly equal to 0
+	if(myid==0){
+		//Initialize data to be sent
+        for(int i = 0; i < N; i++) arr[i] = i + 1;
+		//Send data
+		MPI_Send(arr, N, MPI_INT, 1, 0, MPI_COMM_WORLD);
+		printf("\nmyid: %d \t Data sent.\n", myid);
+	}
+	else if(myid==1){	// Process with ID exactly equal to 1
+		//Initialize receive array to some other data
+		MPI_Recv(arr, N, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		printf("\nmyid: %d \t Data received.\n", myid);
+		//Print received data
+        for(int i = 0; i < N; i++)
+          printf("%d ", arr[i]);
+	}
+
+	//End MPI environment
+	MPI_Finalize();
+}
+#+end_src
+
+#+begin_src bash :session openmpi :results output :exports both
+mpicc p2p_mpi_array9.c -o p2p_mpi_array9.out
+#+end_src
+
+#+RESULTS:
+
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./p2p_mpi_array9.out 2
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1165607
+* Point to point communication
+This will create 1000 send calls and 1000 recv calls which is not good for your network.
+#+begin_src C :tangle p2p.c
+#include<stdio.h>
+#include<mpi.h>
+#define N 1000
+int main(){
+    int size, rank;
+    int a[N];
+    MPI_Init(NULL, NULL);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    if(rank == 0){
+        for(int i = 0; i < N; i++){
+                a[i] = i + 1;
+        }
+
+        for(int i = 0; i < N; i++){
+            MPI_Send(&a[i], 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+        }
+    }
+    else{
+        for(int i = 0; i < N; i++){
+            MPI_Recv(&a[i], 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        }
+        for(int i = N - 10; i < N; i++){
+            printf("%d ", a[i]);
+        }
+    }
+
+    MPI_Finalize();
+}
+#+end_src
+
+#+begin_src bash :session openmpi :results output :exports both
+mpicc p2p.c -o p2p.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./p2p.out 2
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1165610
+
+** Better way
+#+begin_src C :tangle p2p1.c
+#include<stdio.h>
+#include<mpi.h>
+#define N 1000
+int main(){
+    int size, rank;
+    int a[N];
+    MPI_Init(NULL, NULL);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    if(rank == 0){
+        for(int i = 0; i < N; i++){
+                a[i] = i + 1;
+        }
+
+
+        for(int i = 1; i < size; i++){
+            MPI_Send(a, N, MPI_INT, i, 0, MPI_COMM_WORLD);
+        }
+    }
+    else{
+        MPI_Recv(a, N, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        for(int i = N - 10; i < N; i++){
+            printf("%d ", a[i]);
+        }
+        printf("\n");
+    }
+
+    MPI_Finalize();
+}
+#+end_src
+
+#+begin_src bash :session openmpi :results output :exports both
+mpicc p2p1.c -o p2p1.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./p2p1.out 10
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1165612
+
+* MPI Communication: Synchronous and Asynchronous
+** Synchronous Communication using MPI_Send and MPI_Recv
+In synchronous communication, the send operation does not complete until the matching receive operation has been started.
+
+*** mpi_sync.c
+#+BEGIN_SRC C :tangle mpi_sync.c :results output :exports both
+#include <mpi.h>
+#include <stdio.h>
+
+int main(int argc, char** argv) {
+    MPI_Init(&argc, &argv);
+
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    int size;
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    if (size < 2) {
+        fprintf(stderr, "World size must be greater than 1 for this example\n");
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
+
+    int number;
+    if (rank == 0) {
+        number = -1;
+        MPI_Ssend(&number, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+        printf("Process 0 sent number %d to process 1\n", number);
+    } else if (rank == 1) {
+        MPI_Recv(&number, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        printf("Process 1 received number %d from process 0\n", number);
+    }
+
+    MPI_Finalize();
+    return 0;
+}
+#+END_SRC
+
+*** Compilation and Execution (Synchronous)
+- Compile the program:
+  #+BEGIN_src bash :session openmpi :exports both :results output
+  mpicc mpi_sync.c -o mpi_sync.out
+  #+END_SRC
+
+  #+RESULTS:
+
+- Run the program:
+  #+BEGIN_src bash :session openmpi :exports both :results output
+  sbatch script.sh ./mpi_sync.out 2
+  #+END_SRC
+
+  #+RESULTS:
+  : Submitted batch job 1165613
+
+** Asynchronous Communication using MPI_Isend and MPI_Irecv
+In asynchronous communication, the send operation can complete before the matching receive operation starts. Non-blocking operations allow computation and communication to overlap.
+
+*** mpi_async.c
+#+BEGIN_SRC C :tangle mpi_async.c :results output :exports both
+#include <mpi.h>
+#include <stdio.h>
+#include <unistd.h>
+
+int main(int argc, char** argv) {
+    MPI_Init(&argc, &argv);
+
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    int size;
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    if (size < 2) {
+        fprintf(stderr, "World size must be greater than 1 for this example\n");
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
+
+    int number;
+    if (rank == 0) {
+        number = -1;
+        MPI_Request request;
+        MPI_Isend(&number, 1, MPI_INT, 1, 0, MPI_COMM_WORLD, &request);
+        printf("Process 0 sent number %d to process 1\n", number);
+    } else if (rank == 1) {
+        MPI_Request request;
+        MPI_Irecv(&number, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &request);
+        printf("Process 1 received number %d from process 0\n", number);
+    }
+
+    MPI_Finalize();
+    return 0;
+}
+#+END_SRC
+
+*** Compilation and Execution (Asynchronous)
+- Compile the program:
+  #+BEGIN_src bash :session openmpi :exports both :results output
+  mpicc mpi_async.c -o mpi_async.out
+  #+END_SRC
+
+  #+RESULTS:
+
+
+- Run the program:
+  #+BEGIN_src bash :session openmpi :exports both :results output
+  sbatch script.sh ./mpi_async.out 2
+  #+END_SRC
+
+  #+RESULTS:
+  : Submitted batch job 1165626
+
+* MPI Array Sum Calculation Example
+** flow of your program
+- initialize mpi environment
+- let process 0 create and initialize the whole data
+- now process 0 will send the complete data to all other process
+- now every process is having the complete data
+- to define start and end for each process to allow them perform computation on their part of data only
+- every process will start their computation of performing localsum on their part of data from start to end
+- then each process will send their computed localsum to process 0
+- 0 should receive the localsum of each process and at the same time it should add it to a variable totalsum
+- once your total localsum is received by all the process 0 should print the result on your screen.
+- finalize mpi environment
+** mpi_array_sum.c
+#+BEGIN_SRC C :tangle mpi_array_sum.c
+#include <mpi.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char** argv) {
+    MPI_Init(&argc, &argv);
+
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+    int n = 10000; // Size of the array
+    int *array = NULL;
+    int chunk_size = n / world_size;
+    int *sub_array = (int*)malloc(chunk_size * sizeof(int));
+
+    if (world_rank == 0) {
+        array = (int*)malloc(n * sizeof(int));
+        for (int i = 0; i < n; i++) {
+            array[i] = i + 1; // Initialize the array with values 1 to n
+        }
+
+        // Distribute chunks of the array to other processes
+        for (int i = 1; i < world_size; i++) {
+            MPI_Send(array + i * chunk_size, chunk_size, MPI_INT, i, 0, MPI_COMM_WORLD);
+        }
+
+        // Copy the first chunk to sub_array
+        for (int i = 0; i < chunk_size; i++) {
+            sub_array[i] = array[i];
+        }
+    } else {
+        // Receive chunk of the array
+        MPI_Recv(sub_array, chunk_size, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+
+    // Compute the local sum
+    int local_sum = 0;
+    for (int i = 0; i < chunk_size; i++) {
+        local_sum += sub_array[i];
+    }
+
+    if (world_rank != 0) {
+        // Send local sum to process 0
+        MPI_Send(&local_sum, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+    } else {
+        // Process 0 receives the local sums and computes the final sum
+        int final_sum = local_sum;
+        int temp_sum;
+        for (int i = 1; i < world_size; i++) {
+            MPI_Recv(&temp_sum, 1, MPI_INT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            final_sum += temp_sum;
+        }
+        printf("The total sum of array elements is %d\n", final_sum);
+    }
+
+    free(sub_array);
+    if (world_rank == 0) {
+        free(array);
+    }
+
+    MPI_Finalize();
+    return 0;
+}
+#+END_SRC
+
+** Compilation and Execution
+- Compile the program:
+  #+BEGIN_src bash :session openmpi :exports both :results output
+ mpicc mpi_array_sum.c -o mpi_array_sum.out
+  #+END_SRC
+
+  #+RESULTS:
+
+- Run the program:
+  #+BEGIN_src bash :session openmpi :exports both :results output
+  sbatch script.sh ./mpi_array_sum.out 7
+  #+END_SRC
+
+  #+RESULTS:
+  : Submitted batch job 1165629
+
+* MPI Collective Communication
+
+Collective communication involves **all processes within a communicator**.  
+Each process must call the same collective function, and the communication pattern is managed internally by MPI.
+
+Key advantages:
+- More structured than point-to-point.
+- Often faster due to optimized internal communication algorithms.
+- Eliminates manual send/receive complexity.
+
+Below are the core collective operations organized into clear sections.
+
+---
+
+**Overview of Collective Operations**
+
+- *Broadcasting* → One process sends data to all others.
+- *Scattering* → Root divides data and sends parts to each process.
+- *Gathering* → Root collects data from all processes.
+- *Allgather* → Each process gets the combined data from all.
+- *Reduction* → Combine values from processes using operations like sum/min/max.
+- *Allreduce* → Reduction but distribute the result to all.
+- *Barrier* → Synchronize all processes.
+
+---
+
+* MPI_Bcast : Broadcasting Data
+
+**Purpose:**  
+Ensure **every process receives the same data** from one designated root process.
+
+
+**Syntax:**  
+`MPI_Bcast(buffer, count, datatype, root, comm)`
+
+**Explanation:**
+- The root process provides the initial data.
+- After the broadcast, *every process, including the root*, contains the same value.
+- Commonly used to distribute **input values, simulation parameters, configuration blocks**, etc.
+
+**Behavioral Notes:**
+- All processes must call `MPI_Bcast`.
+- Internally implemented using efficient tree or pipeline algorithms.
+  
+#+begin_src C :tangle bcast.c
+#include <stdio.h>
+#include <mpi.h>
+
+int main(int argc, char *argv[]) {
+    int rank, size;
+    int data;
+
+    MPI_Init(&argc, &argv);              
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank); 
+    MPI_Comm_size(MPI_COMM_WORLD, &size); 
+
+    if (rank == 0) {
+        data = 100;   // Value to broadcast
+        printf("Process 0 initialized data = %d\n", data);
+    }
+
+    // Broadcast 'data' from root process (0) to all other processes
+    MPI_Bcast(&data, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    printf("Process %d received data = %d\n", rank, data);
+
+    MPI_Finalize();
+    return 0;
+}
+
+#+end_src
+
+#+begin_src bash :session openmpi :results output :exports both
+mpicc bcast.c -o bcast.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./bcast.out 10
+#+end_src
+---
+
+* MPI_Scatter : Distributing Data From Root
+
+**Purpose:**  
+Divide a large dataset stored at the root and **send equal-sized portions** to each process.
+
+**Syntax:**  
+`MPI_Scatter(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm)`
+
+**Explanation:**
+- Root holds `sendbuf`, which contains multiple blocks (one per process).
+- Each process receives one block into `recvbuf`.
+- Useful for **parallelizing chunks of a large array or workload**.
+
+**Use Case Examples:**
+- Dividing matrix rows among processes.
+- Assigning subsets of tasks to parallel workers.
+
+  #+begin_src C :tangle scatther.c
+#include <stdio.h>
+#include <mpi.h>
+
+int main(int argc, char *argv[]) {
+    int rank, size;
+    int send_data[4] = {10, 20, 30, 40};
+    int recv_data;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    MPI_Scatter(send_data, 1, MPI_INT, &recv_data, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    printf("Process %d received %d\n", rank, recv_data);
+
+    MPI_Finalize();
+    return 0;
+}
+
+  #+end_src
+  
+#+begin_src bash :session openmpi :results output :exports both
+mpicc scatter.c -o scatter.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./scatter.out 10
+#+end_src
+---
+
+* MPI_Gather : Collecting Data to Root
+
+**Purpose:**  
+Collect results or data segments from all processes and store them at the **root process**.
+
+**Syntax:**  
+`MPI_Gather(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm)`
+
+**Explanation:**
+- Each process contributes `sendcount` values.
+- Root receives all values in a *rank-ordered continuous buffer*.
+- Commonly used at the **end of distributed computations** to assemble final results.
+  
+  #+begin_src C :tangle gather.c
+#include <stdio.h>
+#include <mpi.h>
+
+int main(int argc, char *argv[]) {
+    int rank, size;
+    int send_val;
+    int recv_data[4];
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    send_val = rank + 1;
+
+    MPI_Gather(&send_val, 1, MPI_INT, recv_data, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        printf("Root process collected: ");
+        for (int i = 0; i < size; i++)
+            printf("%d ", recv_data[i]);
+        printf("\n");
+    }
+
+    MPI_Finalize();
+    return 0;
+}
+
+  #+end_src
+
+#+begin_src bash :session openmpi :results output :exports both
+mpicc gather.c -o gather.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./gather.out 10
+#+end_src
+---
+
+* MPI_Allgather : Collecting and Redistributing to All
+
+**Purpose:**  
+Like `MPI_Gather`, but **every process receives the full collected dataset**.
+
+**Syntax:**  
+`MPI_Allgather(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm)`
+
+**Explanation:**
+- Useful when tasks need access to each other's results.
+- Eliminates the need for a gather + broadcast sequence.
+
+---
+
+* MPI_Reduce : Reduction to a Single Result at Root
+
+**Purpose:**  
+Combine data from all processes using a *reduction operation* (sum, max, min, etc.)
+
+**Syntax:**  
+`MPI_Reduce(sendbuf, recvbuf, count, datatype, operation, root, comm)`
+
+**Explanation:**
+- The reduction is performed across all processes' values.
+- Only the root receives the final result.
+
+**Common Operations:**
+- `MPI_SUM`, `MPI_MAX`, `MPI_MIN`, etc.
+
+  #+begin_src C :tangle reduce.c
+#include <stdio.h>
+#include <mpi.h>
+
+int main(int argc, char *argv[]) {
+    int rank, size;
+    int value, result;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    value = rank + 1;   // Example values
+
+    MPI_Reduce(&value, &result, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    if (rank == 0)
+        printf("Sum = %d\n", result);
+
+    MPI_Finalize();
+    return 0;
+}
+
+  #+end_src
+  
+#+begin_src bash :session openmpi :results output :exports both
+mpicc reduce.c -o reduce.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./reduce.out 10
+#+end_src
+---
+
+* MPI_Allreduce : Reduction and Distribution to All
+
+**Purpose:**  
+Perform reduction like `MPI_Reduce`, but **send the final result to every process**.
+
+**Syntax:**  
+`MPI_Allreduce(sendbuf, recvbuf, count, datatype, operation, comm)`
+
+**Explanation:**
+- Avoids requiring separate `MPI_Reduce` and `MPI_Bcast`.
+- Frequently used inside iterative parallel algorithms (e.g., computing global convergence tolerance).
+
+**Typical Use Cases:**
+- Global scalar values required by all processes.
+- Performance analysis counters.
+- Normalizing distributed vectors.
+
+---
+
+* MPI_Barrier : Synchronization Point
+
+**Purpose:**  
+Ensure all processes reach the same execution point *before* any may proceed.
+
+**Syntax:**  
+`MPI_Barrier(comm)`
+
+**Explanation:**
+- No communication of data.
+- Used to coordinate phases of computation, debugging, or timing measurements.
+
+**Key Effect:**
+- Introduces synchronization — slows fast processes until slow processes catch up.
+
+---
+
+* Array sum
+#+begin_src C :tangle arrSum.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <mpi.h>
+
+#define N 100
+
+int main() {
+    int rank, size;
+    MPI_Init(NULL, NULL);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    int chunksize = N / size;
+    int* global_arr = NULL;
+    int* local_arr = (int*)malloc(chunksize * sizeof(int));
+
+    if (rank == 0) {
+        global_arr = (int*)malloc(N * sizeof(int));
+        for (int i = 0; i < N; i++) {
+            global_arr[i] = i + 1;
+        }
+    }
+
+    MPI_Scatter(global_arr, chunksize, MPI_INT, local_arr, chunksize, MPI_INT, 0, MPI_COMM_WORLD);
+
+    int local_sum = 0;
+    for (int i = 0; i < chunksize; i++) {
+        local_sum += local_arr[i];
+    }
+
+    int* global_sums = NULL;
+    if (rank == 0) {
+        global_sums = (int*)malloc(size * sizeof(int));
+    }
+
+    MPI_Gather(&local_sum, 1, MPI_INT, global_sums, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        int total_sum = 0;
+        printf ("Array of local sums: \n");
+        for (int i = 0; i < size; i++) {
+            printf("%d ", global_sums[i]);
+            total_sum += global_sums[i];
+        }
+        printf("\nTotal sum = %d\n", total_sum);
+        free(global_arr);
+        free(global_sums);
+    }
+
+    free(local_arr);
+    MPI_Finalize();
+    return 0;
+}
+#+end_src
+
+#+begin_src bash :session openmpi :results output :exports both
+mpicc arrSum.c -o arrSum.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./arrSum.out 10
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1165632
+
+* Array sum with Reduce
+#+begin_src C :tangle arrSum_reduce.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <mpi.h>
+
+#define N 100
+
+int main() {
+    int rank, size;
+    MPI_Init(NULL, NULL);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    int chunksize = N / size;
+    int* global_arr = NULL;
+    int* local_arr = (int*)malloc(chunksize * sizeof(int));
+    if (rank == 0) {
+        global_arr = (int*)malloc(N * sizeof(int));
+        for (int i = 0; i < N; i++) {
+            global_arr[i] = i + 1;
+        }
+    }
+    MPI_Scatter(global_arr, chunksize, MPI_INT, local_arr, chunksize, MPI_INT, 0, MPI_COMM_WORLD);
+    int local_sum = 0;
+    for (int i = 0; i < chunksize; i++) {
+        local_sum += local_arr[i];
+    }
+    int final_sum;
+    MPI_Reduce(&local_sum, &final_sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    printf("rank = %d\ttotal sum = %d\n", rank, final_sum);
+    if(rank == 0){
+        free(global_arr);
+    }
+    free(local_arr);
+    MPI_Finalize();
+    return 0;
+}
+#+end_src
+
+#+begin_src bash :session openmpi :results output :exports both
+mpicc arrSum_reduce.c -o arrSum_reduce.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./arrSum_reduce.out 10
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1165633
+
+* Array sum with and broadcasting the total sum to all the process
+#+begin_src C :tangle arrSum_reduce1.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <mpi.h>
+#define N 10000
+
+int main() {
+    int rank, size;
+    MPI_Init(NULL, NULL);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    int chunksize = N / size;
+    int* global_arr = NULL;
+    int* local_arr = (int*)malloc(chunksize * sizeof(int));
+    if (rank == 0) {
+        global_arr = (int*)malloc(N * sizeof(int));
+        for (int i = 0; i < N; i++) {
+            global_arr[i] = i + 1;
+        }
+    }
+    MPI_Scatter(global_arr, chunksize, MPI_INT, local_arr, chunksize, MPI_INT, 0, MPI_COMM_WORLD);
+    int local_sum = 0;
+    for (int i = 0; i < chunksize; i++) {
+        local_sum += local_arr[i];
+    }
+    int final_sum;
+    MPI_Reduce(&local_sum, &final_sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&final_sum, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    printf("rank = %d\ttotal sum = %d\n", rank, final_sum);
+    if(rank == 0){
+        free(global_arr);
+    }
+    free(local_arr);
+    MPI_Finalize();
+    return 0;
+}
+#+end_src
+
+#+begin_src bash :session openmpi :results output :exports both
+mpicc arrSum_reduce1.c -o arrSum_reduce1.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./arrSum_reduce1.out 10
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1165635
+
+* Array sum with all reduce
+#+begin_src C :tangle arrSum_allreduce.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <mpi.h>
+#define N 10000
+
+int main() {
+    int rank, size;
+    MPI_Init(NULL, NULL);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    int chunksize = N / size;
+    int* global_arr = NULL;
+    int* local_arr = (int*)malloc(chunksize * sizeof(int));
+    if (rank == 0) {
+        global_arr = (int*)malloc(N * sizeof(int));
+        for (int i = 0; i < N; i++) {
+            global_arr[i] = i + 1;
+        }
+    }
+    MPI_Scatter(global_arr, chunksize, MPI_INT, local_arr, chunksize, MPI_INT, 0, MPI_COMM_WORLD);
+    int local_sum = 0;
+    for (int i = 0; i < chunksize; i++) {
+        local_sum += local_arr[i];
+    }
+    int final_sum;
+    MPI_Allreduce(&local_sum, &final_sum, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+
+    printf("rank = %d\ttotal sum = %d\n", rank, final_sum);
+    if(rank == 0){
+        free(global_arr);
+    }
+    free(local_arr);
+    MPI_Finalize();
+    return 0;
+}
+#+end_src
+
+#+begin_src bash :session openmpi :results output :exports both
+mpicc arrSum_allreduce.c -o arrSum_allreduce.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./arrSum_allreduce.out 10
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1165638
+
+* allgather
+#+begin_src C :tangle task3.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <mpi.h>
+
+#define N 100
+
+int main() {
+    int rank, size;
+    MPI_Init(NULL, NULL);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    int chunksize = N / size;
+    int* global_arr;
+    int* local_arr = (int*)malloc(chunksize * sizeof(int));
+
+    if (rank == 0) {
+        global_arr = (int*)malloc(N * sizeof(int));
+        for (int i = 0; i < N; i++) {
+            global_arr[i] = i + 1;
+        }
+    }
+
+    MPI_Scatter(global_arr, chunksize, MPI_INT, local_arr, chunksize, MPI_INT, 0, MPI_COMM_WORLD);
+
+    int local_sum = 0;
+    for (int i = 0; i < chunksize; i++) {
+        local_sum += local_arr[i];
+    }
+
+    int* global_sums = NULL;
+    global_sums = (int*)malloc(size * sizeof(int));
+
+    MPI_Allgather(&local_sum, 1, MPI_INT, global_sums, 1, MPI_INT, MPI_COMM_WORLD);
+
+    for (int i = 0; i < size; i++) {
+        printf("%d ", global_sums[i]);
+    }
+    printf("\n");
+    if(rank == 0) free(global_arr);
+    free(global_sums);
+
+    free(local_arr);
+    MPI_Finalize();
+    return 0;
+}
+#+end_src
+
+#+begin_src bash :session openmpi :results output :exports both
+mpicc task3.c -o task3.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./task3.out 10
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1165640
+
+* MPI Array Sum Calculation with Timing
+** Introduction to MPI_Wtime
+`MPI_Wtime` is a function in MPI that returns the elapsed wall-clock time in seconds since an arbitrary point in the past. It is used to measure the performance and execution time of parallel programs.
+
+** Syntax
+#+BEGIN_SRC c
+double MPI_Wtime(void);
+#+END_SRC
+
+* Array sum with timing
+#+begin_src C :tangle arrSum1.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <mpi.h>
+
+
+int main() {
+    int rank, size;
+    MPI_Init(NULL, NULL);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    const long long N = 1000000000;
+    double startTime, endTime;
+    long long chunksize = N / size;
+    long long* global_arr = NULL;
+    long long* local_arr = (long long*)malloc(chunksize * sizeof(long long));
+
+    if (rank == 0) {
+        global_arr = (long long*)malloc(N * sizeof(long long));
+        for (int i = 0; i < N; i++) {
+            global_arr[i] = i + 1;
+        }
+    }
+
+    if(rank == 0) startTime = MPI_Wtime();
+    MPI_Scatter(global_arr, chunksize, MPI_LONG_LONG_INT, local_arr, chunksize, MPI_LONG_LONG_INT, 0, MPI_COMM_WORLD);
+
+    long long local_sum = 0;
+    for (int i = 0; i < chunksize; i++) {
+        local_sum += local_arr[i];
+    }
+
+
+    long long* global_sums = NULL;
+    if (rank == 0) {
+        global_sums = (long long*)malloc(size * sizeof(long long));
+    }
+
+    MPI_Gather(&local_sum, 1, MPI_LONG_LONG_INT, global_sums, 1, MPI_LONG_LONG_INT, 0, MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        long long total_sum = 0;
+
+        printf ("Array of local sums: \n");
+        for (int i = 0; i < size; i++) {
+            //printf("%d ", global_sums[i]);
+            total_sum += global_sums[i];
+        }
+        endTime = MPI_Wtime();
+        printf("rank %d : timing %lf\n", rank, endTime - startTime);
+        printf("\nTotal sum = %lld\n", total_sum);
+        free(global_arr);
+        free(global_sums);
+    }
+
+    free(local_arr);
+    MPI_Finalize();
+    return 0;
+}
+#+end_src
+
+#+begin_src bash :session openmpi :results output :exports both
+mpicc arrSum1.c -o arrSum1.out
+#+end_src
+
+#+RESULTS:
+
+#+begin_src bash :session openmpi :results output :exports both
+sbatch script.sh ./arrSum1.out 100
+#+end_src
+
+#+RESULTS:
+: Submitted batch job 1165772
