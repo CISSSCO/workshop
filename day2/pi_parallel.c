@@ -21,6 +21,10 @@ int main()
     long long chunksize = N / size;
     long long start = rank * chunksize;
     long long end = start + chunksize;
+    //rank 0 : s = 0 , e = 25
+    //rank 1 : s = 25, e = 50
+    //rank 2 : s = 50, e = 75
+    //rank 3 : s = 75, e = 103
     if(rank == size - 1) end = N;
     if(rank == 0)
         gettimeofday(&start_time, NULL);

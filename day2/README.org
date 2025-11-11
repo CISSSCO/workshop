@@ -781,7 +781,7 @@ int main(int argc, char** argv) {
   #+END_SRC
 
   #+RESULTS:
-  : Submitted batch job 1165626
+  : Submitted batch job 1166510
 
 * MPI Array Sum Calculation Example
 ** flow of your program
@@ -809,9 +809,10 @@ int main(int argc, char** argv) {
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-    int n = 10000; // Size of the array
+    int n = 10000000; // Size of the array
     int *array = NULL;
     int chunk_size = n / world_size;
+    int
     int *sub_array = (int*)malloc(chunk_size * sizeof(int));
 
     if (world_rank == 0) {
@@ -874,11 +875,11 @@ int main(int argc, char** argv) {
 
 - Run the program:
   #+BEGIN_src bash :session openmpi :exports both :results output
-  sbatch script.sh ./mpi_array_sum.out 7
+  sbatch script.sh ./mpi_array_sum.out 10
   #+END_SRC
 
   #+RESULTS:
-  : Submitted batch job 1165629
+  : Submitted batch job 1166533
 
 * MPI Collective Communication
 
@@ -961,6 +962,10 @@ mpicc bcast.c -o bcast.out
 #+begin_src bash :session openmpi :results output :exports both
 sbatch script.sh ./bcast.out 10
 #+end_src
+
+#+RESULTS:
+: Submitted batch job 1166573
+
 ---
 
 * MPI_Scatter : Distributing Data From Root
@@ -986,12 +991,13 @@ Divide a large dataset stored at the root and **send equal-sized portions** to e
 
 int main(int argc, char *argv[]) {
     int rank, size;
-    int send_data[4] = {10, 20, 30, 40};
+    
     int recv_data;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
+    if(rank)
 
     MPI_Scatter(send_data, 1, MPI_INT, &recv_data, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
@@ -1066,6 +1072,10 @@ mpicc gather.c -o gather.out
 #+begin_src bash :session openmpi :results output :exports both
 sbatch script.sh ./gather.out 10
 #+end_src
+
+#+RESULTS:
+: Submitted batch job 1166576
+
 ---
 
 * MPI_Allgather : Collecting and Redistributing to All
