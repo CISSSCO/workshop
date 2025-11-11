@@ -13,9 +13,7 @@ int main(){
         }
 
 
-        for(int i = 1; i < size; i++){
-            MPI_Send(a, N, MPI_INT, i, 0, MPI_COMM_WORLD);
-        }
+        MPI_Send(a, N, MPI_INT, 1, 0, MPI_COMM_WORLD);
     }
     else{
         MPI_Recv(a, N, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);

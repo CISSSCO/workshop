@@ -21,7 +21,7 @@ int main()
 	}
 	else{	// Process with ID exactly equal to 1
         if(myid == size - 1){
-            printf("I left\n");
+            printf("I left : id : %d\n", myid);
         }
         else{
                myval = 200;

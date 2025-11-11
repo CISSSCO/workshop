@@ -956,7 +956,7 @@ sum += arr[i];
 Create a program to perform sum of thread ids of every thread.
 
 * Assignment
-Create a parallel matrix addition program.
+Create a parallel matrix multiplication program.
 - Assign your data with 1.
 - Create serial and parallel version in the same code.
 - Measure computation time.

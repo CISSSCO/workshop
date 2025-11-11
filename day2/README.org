@@ -298,6 +298,8 @@ int main(){
 
 ** compile
 #+begin_src bash :session openmpi :results output :exports both
+#module load gnu8/8.3.0
+#module load openmpi/4.1.1
 mpicc hello1.c -o hello1.out
 #+end_src
 
@@ -305,11 +307,12 @@ mpicc hello1.c -o hello1.out
 
 ** run
 #+begin_src bash :session openmpi :results output :exports both
-sbatch script.sh ./hello1.out 4
+sbatch script.sh ./hello1.out 30
+#mpirun -np 10 ./hello1.out
 #+end_src
 
 #+RESULTS:
-: Submitted batch job 1165884
+: Submitted batch job 1166188
 
 * task1
 #+begin_src C :tangle task1.c
@@ -376,7 +379,8 @@ int main(int argc, char **argv)
 	int myid, size;
 	int myval;
 
-	MPI_Init(&argc,&argv);
+	//MPI_Init(&argc,&argv);
+    MPI_Init(NULL,NULL);
 
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 
@@ -412,7 +416,7 @@ sbatch script.sh ./p2p_mpi.out 2
 #+end_src
 
 #+RESULTS:
-: Submitted batch job 1165582
+: Submitted batch job 1166246
 
 
 ** Sending array to process 1
@@ -496,7 +500,7 @@ int main()
 	}
 	else{	// Process with ID exactly equal to 1
         if(myid == size - 1){
-            printf("I left\n");
+            printf("I left : id : %d\n", myid);
         }
         else{
                myval = 200;
@@ -521,7 +525,7 @@ sbatch script.sh ./p2p_mpi7.out 4
 #+end_src
 
 #+RESULTS:
-: Submitted batch job 1165912
+: Submitted batch job 1166400
 
 
 ** Sending array to process 1
@@ -585,7 +589,7 @@ This will create 1000 send calls and 1000 recv calls which is not good for your 
 #+begin_src C :tangle p2p.c
 #include<stdio.h>
 #include<mpi.h>
-#define N 1000
+#define N 100
 int main(){
     int size, rank;
     int a[N];
@@ -644,9 +648,7 @@ int main(){
         }
 
 
-        for(int i = 1; i < size; i++){
-            MPI_Send(a, N, MPI_INT, i, 0, MPI_COMM_WORLD);
-        }
+        MPI_Send(a, N, MPI_INT, 1, 0, MPI_COMM_WORLD);
     }
     else{
         MPI_Recv(a, N, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -667,11 +669,11 @@ mpicc p2p1.c -o p2p1.out
 #+RESULTS:
 
 #+begin_src bash :session openmpi :results output :exports both
-sbatch script.sh ./p2p1.out 10
+sbatch script.sh ./p2p1.out 2
 #+end_src
 
 #+RESULTS:
-: Submitted batch job 1165612
+: Submitted batch job 1166466
 
 * MPI Communication: Synchronous and Asynchronous
 ** Synchronous Communication using MPI_Send and MPI_Recv

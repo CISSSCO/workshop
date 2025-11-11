@@ -1,6 +1,6 @@
 #include<stdio.h>
 #include<mpi.h>
-#define N 1000
+#define N 100
 int main(){
     int size, rank;
     int a[N];
