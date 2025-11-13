@@ -1,0 +1,1098 @@
+% Created 2025-11-12 Wed 22:04
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\author{Abhishek Raj}
+\date{2025-11-08}
+\title{Parallel Programming Using OpenMP}
+\hypersetup{
+ pdfauthor={Abhishek Raj},
+ pdftitle={Parallel Programming Using OpenMP},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 29.3 (Org mode 9.7.34)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\section{\href{https://github.com/CISSSCO/workshop.git}{GitHub}}
+\label{sec:orgb4aa94c}
+\section{Setting up environment}
+\label{sec:orga566768}
+\subsection{compile}
+\label{sec:orgb4b2945}
+\begin{verbatim}
+source /scratch/$USER/spack/share/spack/setup-env.sh
+spack load gcc/6qthuq2
+export PATH="/home/abhishekraj.cdac/.local/gitpush:$PATH"
+\end{verbatim}
+\subsection{run}
+\label{sec:org1cc7fb9}
+\begin{verbatim}
+
+#!/bin/bash
+#SBATCH -N 1                                    # Nodes = 1
+#SBATCH --ntasks-per-node=40                    # Tasks on each node = 40 
+#SBATCH --job-name=omp                          # Specify job name
+#SBATCH --output=%J.out                         # Name of your output file (%J is replaced with job_id)
+#SBATCH --error=%J.err                          # Name of your error file
+#SBATCH --time=1-00:00:00                       # Specify time taken to run your script
+#SBATCH --partition=cpu                         # Specify partition (cpu, gpu, hm)
+#SBATCH --reservation=hpcws
+
+ulimit -s unlimited
+
+./$1
+
+\end{verbatim}
+\section{Part 1}
+\label{sec:org7b23f56}
+
+\section{Agenda}
+\label{sec:orga9a4214}
+\begin{itemize}
+\item What is Parallel Programming?
+\item Why Parallel Programming?
+\item Concurrency vs Parallelism
+\item Terminology
+\item What is OpenMP?
+\item Hello World in OpenMP.
+\end{itemize}
+\section{Serial Computing}
+\label{sec:org265d402}
+\begin{itemize}
+\item Problem is broken into stream of instructions that are executed sequentially one after the other on a single processor.
+\item One instruction executes at a time.
+\end{itemize}
+\section{Parallel Computing}
+\label{sec:org9b061f6}
+\begin{itemize}
+\item Doing things simultaneously
+\item Same thing or different thing
+\item Solving one large problem
+
+\item Here things refers to programs or tasks (parts of programs).
+\end{itemize}
+\section{Why Parallel Computing}
+\label{sec:org2726397}
+\begin{itemize}
+\item Handling complex tasks
+\item Improved performance
+\item Better resource utilization
+\item Scalability
+\item Save time
+\item Save money
+\end{itemize}
+\section{Applications of Parallel Computing}
+\label{sec:org0eddcb2}
+\begin{itemize}
+\item Data mining
+\item Real-time simulations
+\item Scientific calculations
+\item Graphical applications
+\item AI and Machine Learning, etc.
+\end{itemize}
+\section{Serial Computing vs Parallel Computing\hfill{}\textsc{ATTACH}}
+\label{sec:orge460734}
+\begin{center}
+\includegraphics[width=.9\linewidth]{/home/abhi581b/org/.attach/ae/6f9ae3-a3d0-46ad-84c9-6b10fb553c54/_20251109_211039Parallel-vs-sequential-programming.png}
+\end{center}
+\subsection{Serial Computing}
+\label{sec:org219fe2e}
+\begin{itemize}
+\item Problem is broken into stream of instructions executed one after the other by a single core.
+\end{itemize}
+\subsection{Parallel Computing}
+\label{sec:orgef70137}
+\begin{itemize}
+\item Problem is broken into parts that can be solved concurrently.
+\item Each part is further broken into stream of instructions.
+\item Instructions from different parts execute simultaneously on different processors.
+\end{itemize}
+\section{Concurrency vs Parallelism\hfill{}\textsc{ATTACH}}
+\label{sec:org4417b07}
+\begin{center}
+\includegraphics[width=.9\linewidth]{/home/abhi581b/org/.attach/e0/fc86cd-4306-481c-b38d-7d2e0e080c1d/_20251109_2117341*cbFp5h440Mo0gOlY-A7Scg.jpeg}
+\end{center}
+\subsection{Concurrency}
+\label{sec:org0715d77}
+Making progress on more than one task - seemingly at the same time.
+\subsection{Parallelism}
+\label{sec:orgd854299}
+Splitting a single task into subtasks which can be executed in parallel.
+\section{Types of Parallelism}
+\label{sec:org1291e41}
+\subsection{Task Parallelism}
+\label{sec:org8d93f45}
+Tasks are divided between number of processes/cores.
+\subsection{Data Parallelism}
+\label{sec:org9092871}
+\begin{itemize}
+\item Data is divided between number of processes/cores.
+\item They all perform similar tasks.
+\end{itemize}
+\section{General Parallel Computing Terminology}
+\label{sec:orgb6626c4}
+\begin{itemize}
+\item Shared Memory
+\item Distributed Memory
+\item Node
+\item Core
+\item CPU
+\item Process
+\item Thread
+\end{itemize}
+\section{Shared Memory\hfill{}\textsc{ATTACH}}
+\label{sec:org5e20339}
+\begin{center}
+\includegraphics[width=.9\linewidth]{/home/abhi581b/org/.attach/88/be0043-790c-4093-bef0-d71d9a565734/_20251109_2105467tbYe.png}
+\end{center}
+
+\begin{itemize}
+\item Memory is shared between multiple CPU/cores.
+\item OpenMP is used.
+\end{itemize}
+\section{Distributed Memory\hfill{}\textsc{ATTACH}}
+\label{sec:orgaa88acf}
+\begin{center}
+\includegraphics[width=.9\linewidth]{/home/abhi581b/org/.attach/5a/d40a64-45e0-4d6e-9bbd-6d809c7e0b24/_20251109_210837UzaWGc5.jpg}
+\end{center}
+
+\begin{itemize}
+\item Every CPU has their own memory space and they are connected through a network.
+\item Message Passing is used.
+\end{itemize}
+\section{Terminology}
+\label{sec:orgf16a651}
+\begin{itemize}
+\item \textbf{Node}: A standalone ``computer in a box.'' Usually comprised of multiple CPUs/processors/cores, memory, network interfaces, etc. Nodes are networked together to comprise a supercomputer.
+\item \textbf{CPU}: Contemporary CPUs consist of one or more cores.
+\item \textbf{Process}: A process is an instance of a program that is being executed or processed.
+\item \textbf{Thread}: Thread is a segment of a process or a lightweight process that is managed by the scheduler independently.
+\end{itemize}
+\section{What is OpenMP?}
+\label{sec:orge83a31d}
+\begin{itemize}
+\item OpenMP stands for Open Multi-Processing.
+\item Portable \emph{shared memory} programming.
+\item It is an API that is used for parallelizing codes.
+\item Compatible with C/C++ and Fortran.
+\end{itemize}
+\section{Why OpenMP?}
+\label{sec:org2044127}
+\begin{itemize}
+\item Easy to learn: Pragma based syntaxes.
+\item No need to changes the whole code (one line is enough to make your code parallel).
+\item Compiler takes care of all the complexity behind the scene of running your code.
+\item Support: Works with gcc compiler.
+\item Extra functionalities can be added using Environment Variables and Runtime-library routines.
+\end{itemize}
+\section{Hello World in C}
+\label{sec:orgf381377}
+\begin{verbatim}
+#include<stdio.h>
+int main(){
+    printf("Hello, World\n");
+    return 0;
+}
+\end{verbatim}
+\section{Compile and Run C}
+\label{sec:org56ba6fb}
+\begin{verbatim}
+#gcc --version
+gcc hello.c -o hello.out 
+\end{verbatim}
+
+\begin{verbatim}
+#gcc --version
+./hello.out
+#sbatch script.sh hello.out
+\end{verbatim}
+\section{Hello World in OpenMP}
+\label{sec:orgc5f608c}
+\begin{verbatim}
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    #pragma omp parallel
+    {
+        printf("Hello, World\n");
+    }
+    return 0;
+}
+\end{verbatim}
+\section{Compile and Run OpenMP}
+\label{sec:org6ad1e28}
+\begin{verbatim}
+gcc hello_omp.c -o hello_omp.out -fopenmp
+\end{verbatim}
+
+\begin{verbatim}
+#sbatch script.sh hello_omp.out
+./hello_omp.out
+\end{verbatim}
+\section{Part 2}
+\label{sec:orge7cc2b5}
+
+\section{Agenda}
+\label{sec:org644b360}
+\begin{itemize}
+\item Understanding OpenMP code
+\item Script for running OpenMP jobs
+\item OpenMP directives
+\item Thread creation
+\item Environment Variables
+\item OpenMP Runtime Routines
+\end{itemize}
+\section{Script for Running OpenMP Jobs}
+\label{sec:orgc6b059d}
+\begin{itemize}
+\item Create a file named \textbf{run.sh} in your code folder and paste below content in the file.
+\item After that make the file executable.
+\end{itemize}
+
+\begin{verbatim}
+#!/bin/bash
+#SBATCH -N 1                                    # Nodes = 1
+#SBATCH --ntasks-per-node=40                    # Tasks on each node = 40 
+#SBATCH --job-name=omp                          # Specify job name
+#SBATCH --output=%J.out                         # Name of your output file (%J is replaced with job_id)
+#SBATCH --error=%J.err                          # Name of your error file
+#SBATCH --time=1-00:00:00                       # Specify time taken to run your script
+#SBATCH --partition=cpu                         # Specify partition (cpu, gpu, hm)
+#SBATCH --reservation=hpcws.user
+
+ulimit -s unlimited
+
+./$1
+\end{verbatim}
+\section{Using script.sh script}
+\label{sec:orgf0909fe}
+\begin{itemize}
+\item Create a file called script.sh in your folder and paste the content inside the file.
+\item Make the file executable using below command:
+\end{itemize}
+
+\begin{verbatim}
+chmod +x script.sh
+\end{verbatim}
+
+\begin{itemize}
+\item Now you can run your code using below command (run on the node directly):
+\end{itemize}
+
+\begin{verbatim}
+./script.sh a.out
+\end{verbatim}
+
+\begin{itemize}
+\item You can also use this if previous is not working (slurm scheduling):
+\end{itemize}
+
+\begin{verbatim}
+sbatch script.sh a.out
+\end{verbatim}
+\section{Fork-Join Model\hfill{}\textsc{ATTACH}}
+\label{sec:org0a7d703}
+\url{file:///home/abhi581b/org/.attach/81/049272-ddf6-4a78-9f94-30aff6892a5a/\_20251109\_212054fork\_join.gif}
+\subsection{Parallel Region}
+\label{sec:orgd2e3a6d}
+\begin{verbatim}
+#pragma omp parallel
+{
+    // this is the parallel region
+    // anything written here will be executed by multiple threads
+}
+\end{verbatim}
+\section{OpenMP Constructs and Clause}
+\label{sec:orga253765}
+\begin{verbatim}
+#pragma omp [constructs] [clause]
+{
+    // this is the parallel region
+    // anything written here will be executed by multiple cores
+}
+\end{verbatim}
+\section{OpenMP Constructs}
+\label{sec:org8449b1b}
+Constructs tell the compiler \textbf{where and how} to parallelize the code.
+\subsection{Common constructs:}
+\label{sec:org3f803d9}
+\begin{itemize}
+\item parallel
+\item for
+\item section
+\item atomic
+\item master
+\item single
+\item sections, etc.
+\end{itemize}
+\section{OpenMP Clause}
+\label{sec:org95dbbd9}
+Clauses refine how the parallelism is implemented, control thread behavior, and specify how variables are shared among threads.
+\subsection{Common clauses:}
+\label{sec:org66e185f}
+\begin{itemize}
+\item if
+\item num\_threads
+\item reduction
+\item private
+\item shared
+\item firstprivate
+\item lastprivate, etc.
+\end{itemize}
+\section{Assigning Number of Threads}
+\label{sec:orgb9ddb18}
+\subsection{Using Environment Variables}
+\label{sec:org5ae0491}
+\begin{verbatim}
+export OMP_NUM_THREADS=4
+\end{verbatim}
+\subsection{Using OpenMP Clause}
+\label{sec:org9c0a8e1}
+\begin{verbatim}
+#pragma omp parallel num_threads(4)
+\end{verbatim}
+\subsection{Using Runtime Routine}
+\label{sec:org0204c78}
+\begin{verbatim}
+omp_set_num_threads(7);
+\end{verbatim}
+\section{Assigning Number of Threads — Order of Precedence}
+\label{sec:org38e5c78}
+Order of Precedence for assigning number of threads:
+
+\begin{enumerate}
+\item num\_threads() clause
+\item Routine calls (omp\_set\_num\_threads)
+\item Environment variables
+\end{enumerate}
+
+If all are present → clause takes highest precedence.
+\section{Assigning Number of Threads (Example)}
+\label{sec:org0b5d180}
+\begin{verbatim}
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    //omp_set_num_threads(2);
+    #pragma omp parallel 
+    {
+        //omp_get_thread_num();
+        printf("Hello, World \n" );
+    }
+    return 0;
+}
+\end{verbatim}
+\section{Runtime Library Routines}
+\label{sec:orgf5c655e}
+\begin{itemize}
+\item omp\_set\_num\_threads(n);  
+Set number of threads, n can be any natural number.
+
+\item omp\_get\_num\_threads();  
+Returns total number of threads inside a parallel region.  
+If called outside parallel region, returns 1.
+
+\item omp\_get\_thread\_num();  
+Returns the id of a particular thread (unique id per thread).
+\end{itemize}
+\section{Printing thread id of each thread (Example)}
+\label{sec:orgde828ff}
+\begin{verbatim}
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    //omp_set_num_threads(2);
+    #pragma omp parallel num_threads(7)
+    {
+        printf("Hello, World from thread %d\n", omp_get_thread_num());
+    }
+    return 0;
+}
+\end{verbatim}
+\section{Part 3}
+\label{sec:org24246ad}
+
+\section{Agenda}
+\label{sec:orge1f27b9}
+\begin{itemize}
+\item OpenMP Memory Model
+\item Data scoping
+\item Work-sharing constructs
+\item OpenMP for
+\item OpenMP Error correction
+\end{itemize}
+\section{OpenMP Memory Model}
+\label{sec:org9e21a9c}
+\begin{itemize}
+\item OpenMP uses the \textbf{shared memory model}:
+\item Most variables are \textbf{shared by default} among threads, unless specified otherwise.
+\end{itemize}
+\section{Data Scoping Clauses}
+\label{sec:org6febb90}
+\begin{itemize}
+\item shared
+\item private
+\item default
+\item firstprivate
+\item lastprivate
+\end{itemize}
+\section{Printing thread id of each thread (Example)}
+\label{sec:orgc3f0389}
+\begin{verbatim}
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    //omp_set_num_threads(2);
+    #pragma omp parallel num_threads(7)
+    {
+        int tid = omp_get_thread_num();
+        printf("Hello, World from thread %d\n", tid);
+    }
+    return 0;
+}
+\end{verbatim}
+\section{Private}
+\label{sec:org468b8b2}
+\begin{itemize}
+\item Private means every thread has its \textbf{own copy} of the variables.
+\item Changes made inside parallel region are not visible to other threads.
+\item Variables created inside a parallel region are private by default.
+\end{itemize}
+
+Syntax:
+\begin{verbatim}
+int x = 10, y = 20, z;
+#pragma omp parallel private(x, y, z)
+\end{verbatim}
+\begin{itemize}
+\item Private clause can take multiple variables separated by commas.
+\end{itemize}
+\section{Private Example}
+\label{sec:orgeb12ee1}
+\begin{verbatim}
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    int x = 10;
+    int y = 20;
+    #pragma omp parallel private(x,y)
+    {
+        printf("Thread %d: x = %d and y = %d\n", omp_get_thread_num(), x, y);
+    }
+    return 0;
+}
+\end{verbatim}
+\section{Shared}
+\label{sec:org29372e0}
+\begin{itemize}
+\item Shared means variables are accessible to all threads.
+\item By default, most variables outside the parallel region are shared.
+\end{itemize}
+
+Syntax:
+\begin{verbatim}
+int x = 10, y = 20, z;
+#pragma omp parallel shared(x, y, z)
+\end{verbatim}
+\section{Shared Example}
+\label{sec:org6da6a77}
+\begin{verbatim}
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    int x = 10;
+    int y = 20;
+    #pragma omp parallel shared(x,y)
+    {
+        printf("Thread %d: x = %d and y = %d\n", omp_get_thread_num(), x, y);
+    }
+    return 0;
+}
+\end{verbatim}
+\section{Firstprivate}
+\label{sec:orga76bdc8}
+\begin{itemize}
+\item Similar to private
+\item BUT copies initial values of variables from outside region to each thread’s private copy
+\end{itemize}
+
+Syntax:
+\begin{verbatim}
+int x = 10, y = 20, z;
+#pragma omp parallel firstprivate(x, y, z)
+\end{verbatim}
+\section{Firstprivate Example}
+\label{sec:org5656277}
+\begin{verbatim}
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    int x = 10;
+    int y = 20;
+    #pragma omp parallel firstprivate(x,y)
+    {
+        printf("Thread %d: x = %d and y = %d\n", omp_get_thread_num(), x, y);
+    }
+    return 0;
+}
+\end{verbatim}
+\section{Benefits of Firstprivate Clause}
+\label{sec:orged18caf}
+\begin{itemize}
+\item Initialization: Ensures each thread starts with same initial values
+\item Isolation: Each thread has its own copy
+\item Independence: Changes do not affect others’ values
+\end{itemize}
+\section{Default}
+\label{sec:org33463a4}
+Default clause specifies how variables are shared when not explicitly stated.
+
+Values:
+\begin{itemize}
+\item shared → default behavior
+\item none → requires explicit specification for every variable
+\end{itemize}
+
+Syntax:
+\begin{verbatim}
+#pragma omp parallel default(none)
+\end{verbatim}
+\section{Default Example}
+\label{sec:orga3c76e1}
+\begin{verbatim}
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    int x = 10;
+    int y = 20;
+    #pragma omp parallel default(none) shared(x) firstprivate(y)
+    {
+        printf("Thread %d: x = %d and y = %d\n", omp_get_thread_num(), x, y);
+    }
+    return 0;
+}
+\end{verbatim}
+\section{Part 4}
+\label{sec:org3d12f29}
+
+\section{Agenda}
+\label{sec:org63cdf87}
+\begin{itemize}
+\item Work-sharing constructs
+\item OpenMP for
+\item Lastprivate clause
+\item Creating data parallelly
+\item Conditional Compilation
+\end{itemize}
+\section{Work-sharing Constructs}
+\label{sec:org5d1477b}
+Work-sharing constructs are used to distribute the workload among threads in a parallel region.
+\subsection{They are used to divide the work of:}
+\label{sec:org8decc92}
+\begin{itemize}
+\item a loop
+\item a section of code
+\item or tasks among threads.
+\end{itemize}
+\subsection{Commonly used:}
+\label{sec:orge51d522}
+\begin{itemize}
+\item for
+\item sections
+\item single
+\item task
+\end{itemize}
+\section{For Construct}
+\label{sec:org8ca3674}
+\begin{verbatim}
+#include<stdio.h>
+#include<omp.h>
+int main(){
+    #pragma omp parallel for
+    for(int i = 0; i < 5; i++){
+        printf("Hello, World\n");
+    }
+    return 0;
+}
+\end{verbatim}
+\section{Lastprivate}
+\label{sec:org93e861a}
+The lastprivate clause is used to preserve the value of a variable from the \textbf{last iteration}.
+\subsection{Similar to private:}
+\label{sec:orgbc039e9}
+\begin{itemize}
+\item Values are private inside parallel region
+\item BUT the final iteration's value gets copied back.
+\end{itemize}
+\subsection{Syntax:}
+\label{sec:org621340e}
+\begin{verbatim}
+#pragma omp parallel for lastprivate(x, y, z)
+\end{verbatim}
+\section{Lastprivate Example}
+\label{sec:org709c0b8}
+\begin{verbatim}
+#include<stdio.h>
+#include<omp.h>
+#include<stdlib.h>
+int main(){
+    int x = 10;
+    #pragma omp parallel lastprivate(x,y)
+    {
+        x  = rand() % 100 + 1;
+        printf("Thread %d: x = %d\n", omp_get_thread_num(), x);
+    }
+    return 0;
+}
+\end{verbatim}
+\section{Creating Data Parallelly}
+\label{sec:org1417862}
+\begin{verbatim}
+#include<stdio.h>
+#include<omp.h>
+#define N 100
+int main(){
+    int arr[N];
+    #pragma omp parallel for num_threads(10)
+    for(int i = 0; i < N; i++){
+        arr[i] = i + 1;
+    }
+    return 0;
+}
+\end{verbatim}
+\section{Conditional Compilation}
+\label{sec:org2d10a4c}
+\begin{itemize}
+\item Improves portability of your code.
+\item Same code can be used as serial and parallel.
+
+\item -fopenmp is used to enable openmp support.
+\end{itemize}
+
+\begin{verbatim}
+#ifdef _OPENMP
+#include<omp.h>
+#endif
+
+#ifdef _OPENMP
+    omp_set_num_threads(10);
+#endif
+\end{verbatim}
+\section{Conditional Compilation Example}
+\label{sec:orgbb8e001}
+\begin{verbatim}
+#include<stdio.h>
+#ifdef _OPENMP
+#include<omp.h>
+#endif
+int main(){
+    int tid = 0;
+    int totalThread = 0;
+#ifdef _OPENMP
+    omp_set_num_threads(10);
+#endif
+    #pragma omp parallel
+    {
+#ifdef _OPENMP
+        tid = omp_get_thread_num();
+        totalThread = omp_get_num_threads();
+#endif
+        printf("Hello from thread %d of %d\n", tid, totalThread);
+    }
+    return 0;
+}
+\end{verbatim}
+\section{Part 5}
+\label{sec:orge05bbe5}
+
+\section{Agenda}
+\label{sec:orgf67c78b}
+\begin{itemize}
+\item OpenMP Scheduling
+\item Static, Dynamic, Guided, Runtime
+\end{itemize}
+\section{OpenMP Scheduling}
+\label{sec:orgec49fb5}
+Scheduling manages how iterations of a loop are distributed among threads.
+\subsection{Goal:}
+\label{sec:orgd8c422b}
+\begin{itemize}
+\item Balance the workload across threads
+\item Minimize idle time
+\item Ensure efficient execution
+\end{itemize}
+\subsection{Types:}
+\label{sec:org7c31cf9}
+\begin{itemize}
+\item static
+\item dynamic
+\item guided
+\item auto
+\item runtime
+\end{itemize}
+\subsection{Syntax:}
+\label{sec:org0d8d929}
+\begin{verbatim}
+#pragma omp parallel for schedule(kind, chunksize)
+\end{verbatim}
+\subsection{Using environment variable:}
+\label{sec:org6540987}
+\begin{verbatim}
+export OMP_SCHEDULE="KIND, CHUNKSIZE"
+\end{verbatim}
+\subsection{Kind values:}
+\label{sec:orgb6ad76b}
+\begin{itemize}
+\item static, dynamic, guided, auto, runtime
+\end{itemize}
+\subsection{Chunksize values:}
+\label{sec:org2860dd5}
+\begin{itemize}
+\item 1, 2, 3, …, N
+\end{itemize}
+\section{Static Scheduling}
+\label{sec:orgbb5ecfc}
+\begin{itemize}
+\item Iterations are pre-assigned to threads in contiguous chunks before loop starts.
+\item Default scheduling mode.
+\item Low overhead and predictable execution.
+\item Can lead to load imbalance if iterations have varying execution times.
+\end{itemize}
+\subsection{Syntax:}
+\label{sec:org7151d33}
+\begin{verbatim}
+#pragma omp parallel for schedule(static, chunksize)
+\end{verbatim}
+\section{Dynamic Scheduling}
+\label{sec:org3b41b08}
+\begin{itemize}
+\item Iterations assigned to threads \textbf{during execution}.
+\item Higher runtime overhead.
+\item Better for uneven workloads.
+\item Good load balancing.
+\end{itemize}
+\subsection{Syntax:}
+\label{sec:org8b52578}
+\begin{verbatim}
+#pragma omp parallel for schedule(dynamic, chunksize)
+\end{verbatim}
+\section{Guided Scheduling}
+\label{sec:orge3837d5}
+\begin{itemize}
+\item Similar to dynamic but chunk size decreases exponentially.
+\item Good load balancing with reduced overhead.
+\item n specifies smallest chunk size (default is 1).
+\end{itemize}
+\subsection{Syntax:}
+\label{sec:org59821a7}
+\begin{verbatim}
+#pragma omp parallel for schedule(guided, n)
+\end{verbatim}
+\section{Runtime Scheduling}
+\label{sec:org8ea8633}
+\begin{itemize}
+\item Allows changing schedule type \textbf{without recompiling}.
+
+\item Compile code once using schedule(runtime)
+\end{itemize}
+
+\begin{verbatim}
+#pragma omp parallel for schedule(runtime)
+\end{verbatim}
+
+\begin{itemize}
+\item Then set schedule externally:
+\end{itemize}
+
+\begin{verbatim}
+export OMP_SCHEDULE="static,3"
+\end{verbatim}
+\section{Part 6}
+\label{sec:org9dc01cf}
+
+\section{Agenda}
+\label{sec:org002b6ab}
+\begin{itemize}
+\item Runtime Routines for scheduling
+\item Assigning work to a particular thread
+\item OpenMP Barrier
+\item OpenMP Single
+\item OpenMP Master
+\item OpenMP Critical
+\end{itemize}
+\section{Runtime Routines for Scheduling}
+\label{sec:org4c7e8c2}
+\begin{verbatim}
+omp_set_schedule(kind, chunksize)
+\end{verbatim}
+\subsection{Example:}
+\label{sec:org5e3e673}
+\begin{verbatim}
+omp_sched_t kind = omp_sched_static;
+omp_set_schedule(kind, 2);
+\end{verbatim}
+\subsection{Other types:}
+\label{sec:org8385329}
+\begin{itemize}
+\item omp\_sched\_dynamic
+\item omp\_sched\_guided
+\item omp\_sched\_auto
+\end{itemize}
+\section{OpenMP Barrier}
+\label{sec:org2037ce4}
+\begin{itemize}
+\item All threads wait at this point until all threads reach it.
+
+\item Syntax:
+\end{itemize}
+\begin{verbatim}
+#pragma omp barrier
+\end{verbatim}
+\section{OpenMP Single}
+\label{sec:org0c1a144}
+\begin{itemize}
+\item Only \textbf{one thread} executes this block.
+
+\item Syntax:
+\end{itemize}
+\begin{verbatim}
+#pragma omp single
+{
+    // code here
+}
+\end{verbatim}
+
+\begin{itemize}
+\item (Implicit barrier unless “nowait” is used)
+\end{itemize}
+\section{OpenMP Master}
+\label{sec:orgac66f9c}
+\begin{itemize}
+\item Only \textbf{master thread (thread 0)} executes this block.
+\item No implicit barrier after master block.
+
+\item Syntax:
+\end{itemize}
+\begin{verbatim}
+#pragma omp master
+{
+    // code here
+}
+\end{verbatim}
+\section{OpenMP Critical}
+\label{sec:orge4b2b3a}
+\begin{itemize}
+\item Ensures \textbf{only one thread} enters the block at a time.
+\item Prevents race conditions.
+
+\item Syntax:
+\end{itemize}
+\begin{verbatim}
+#pragma omp critical
+{
+    // code here
+}
+\end{verbatim}
+\section{Part 7}
+\label{sec:orgee681e4}
+
+\section{Agenda}
+\label{sec:org7d34abf}
+\begin{itemize}
+\item Synchronization in OpenMP
+\item OpenMP Critical
+\item OpenMP Atomic
+\item Sum Program
+\item Practice Q/A
+\end{itemize}
+\section{Synchronization}
+\label{sec:orge3cf614}
+\begin{itemize}
+\item Threads share resources and memory.
+\item Without synchronization → race conditions and incorrect results.
+\end{itemize}
+\subsection{Common synchronization constructs:}
+\label{sec:orgfe585fa}
+\begin{itemize}
+\item critical
+\item barrier
+\item atomic
+\end{itemize}
+\section{OpenMP Critical (again)}
+\label{sec:orgb361b7a}
+Protects shared variables from concurrent updates.
+
+\begin{verbatim}
+#pragma omp critical
+{
+    // code here
+}
+\end{verbatim}
+\section{Reduction}
+\label{sec:org4cbe6a2}
+\begin{itemize}
+\item Allows safe parallel accumulation.
+
+\item Syntax:
+\end{itemize}
+\begin{verbatim}
+#pragma omp parallel for reduction(operator: variable)
+\end{verbatim}
+
+\begin{itemize}
+\item Example:
+\end{itemize}
+\begin{verbatim}
+int sum = 0;
+#pragma omp parallel for reduction(+: sum)
+for (int i = 0; i < 10000; i++) {
+    sum += i;
+}
+\end{verbatim}
+\section{Measuring Time}
+\label{sec:org00b52fb}
+Use `omp\_get\_wtime()`:
+
+\begin{verbatim}
+start_time = omp_get_wtime();
+
+#pragma omp parallel for reduction(+:sum)
+for (int i = 0; i < 1000000; i++) {
+    sum += i;
+}
+
+end_time = omp_get_wtime();
+printf("Execution Time: %f seconds\n", end_time - start_time);
+\end{verbatim}
+\section{Part 8}
+\label{sec:org524f836}
+
+\section{Agenda}
+\label{sec:orgf522650}
+\begin{itemize}
+\item Reduction
+\item OpenMP Atomic
+\item Sum Program Practice
+\end{itemize}
+\section{Atomic}
+\label{sec:org2d52ead}
+\begin{itemize}
+\item Ensures a specific update is performed indivisibly.
+
+\item Syntax:
+\end{itemize}
+\begin{verbatim}
+#pragma omp atomic
+sum += arr[i];
+\end{verbatim}
+\section{Problem}
+\label{sec:orgcea4466}
+Create a program to perform sum of thread ids of every thread.
+\section{Assignment}
+\label{sec:org5b68987}
+Create a parallel matrix multiplication program.
+\begin{itemize}
+\item Assign your data with 1.
+\item Create serial and parallel version in the same code.
+\item Measure computation time.
+\end{itemize}
+\section{Part 9}
+\label{sec:orgcef809d}
+
+\section{Agenda}
+\label{sec:org13a0138}
+\begin{itemize}
+\item Sections
+\item Nowait
+\item Sum of two array
+\item Prime number calculator
+\item PI calculator
+\end{itemize}
+\section{Sections}
+\label{sec:org4b4ccb3}
+\begin{itemize}
+\item Used to divide work into independent tasks.
+
+\item Syntax:
+\end{itemize}
+\begin{verbatim}
+#pragma omp parallel sections
+{
+    #pragma omp section
+    {
+        //task 1
+    }
+    #pragma omp section
+    {
+        //task 2
+    }
+}
+\end{verbatim}
+
+\begin{itemize}
+\item Implicit barrier at end unless “nowait” is used.
+\end{itemize}
+\section{Nowait}
+\label{sec:orgb6d6884}
+\begin{itemize}
+\item Removes implicit barrier.
+
+\item Syntax:
+\end{itemize}
+\begin{verbatim}
+#pragma omp parallel sections nowait
+{
+    #pragma omp section
+    {
+        //task 1
+    }
+    #pragma omp section
+    {
+        //task 2
+    }
+}
+\end{verbatim}
+\section{Assignment}
+\label{sec:org2491ac0}
+\begin{itemize}
+\item Create a parallel matrix multiplication program.
+\item Assign your data with 1.
+\item Create serial and parallel version in same code.
+\item Measure computation time.
+\end{itemize}
+\section{Example codes}
+\label{sec:org9cd993e}
+\begin{itemize}
+\item Array Addition : \href{codes.org}{arrayAddition}
+\item private : \href{codes.org}{private}
+\item firstprivate : \href{codes.org}{firstprivate}
+\item lastprivate : \href{codes.org}{lastprivate}
+\item conditionalCompillation : \href{codes.org}{conditionalCompillation}
+\item manualReduction : \href{codes.org}{manualReduction}
+\item manualReduction1 : \href{codes.org}{manualReduction1}
+\item barrier : \href{codes.org}{barrier}
+\item critical : \href{codes.org}{critical}
+\item dynamic : \href{codes.org}{dynamic}
+\item dynamic1 : \href{codes.org}{dynamic1}
+\item static : \href{codes.org}{static}
+\item section : \href{codes.org}{section}
+\item atomic : \href{codes.org}{atomic}
+\item Matrix Addition : \href{codes.org}{matrixAddition}
+\item taskParallelism : \href{codes.org}{taskParallelism}
+\item taskParallelism1 : \href{codes.org}{taskParallelism1}
+\end{itemize}
+\end{document}

@@ -1,0 +1,1863 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2025-11-13 Thu 11:26 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Parallel Programming Using OpenMP</title>
+<meta name="author" content="Abhishek Raj" />
+<meta name="generator" content="Org Mode" />
+<style type="text/css">
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Parallel Programming Using OpenMP</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org3c183c2">1. GitHub</a></li>
+<li><a href="#org077cdbb">2. Setting up environment</a>
+<ul>
+<li><a href="#org24ca186">2.1. compile</a></li>
+<li><a href="#orgf5310ab">2.2. run</a></li>
+</ul>
+</li>
+<li><a href="#orgb8f7679">3. Part 1</a></li>
+<li><a href="#org0ee233c">4. Agenda</a></li>
+<li><a href="#org60ba658">5. Serial Computing</a></li>
+<li><a href="#orge1c2b46">6. Parallel Computing</a></li>
+<li><a href="#orgb9f4a6a">7. Why Parallel Computing</a></li>
+<li><a href="#orgadbaf38">8. Applications of Parallel Computing</a></li>
+<li><a href="#org9390d8d">9. Serial Computing vs Parallel Computing&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ATTACH">ATTACH</span></span></a>
+<ul>
+<li><a href="#orgd0f4335">9.1. Serial Computing</a></li>
+<li><a href="#org7e21bd4">9.2. Parallel Computing</a></li>
+</ul>
+</li>
+<li><a href="#org54e4693">10. Concurrency vs Parallelism&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ATTACH">ATTACH</span></span></a>
+<ul>
+<li><a href="#org8e53a32">10.1. Concurrency</a></li>
+<li><a href="#org5324763">10.2. Parallelism</a></li>
+</ul>
+</li>
+<li><a href="#orgc8b0391">11. Types of Parallelism</a>
+<ul>
+<li><a href="#orgcf7ae3c">11.1. Task Parallelism</a></li>
+<li><a href="#orgbd645c2">11.2. Data Parallelism</a></li>
+</ul>
+</li>
+<li><a href="#org2623a71">12. General Parallel Computing Terminology</a></li>
+<li><a href="#orgf4a3fde">13. Shared Memory&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ATTACH">ATTACH</span></span></a></li>
+<li><a href="#org92ce7c4">14. Distributed Memory&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ATTACH">ATTACH</span></span></a></li>
+<li><a href="#org9f1f95d">15. Terminology</a></li>
+<li><a href="#org45c14ec">16. What is OpenMP?</a></li>
+<li><a href="#org34529c0">17. Why OpenMP?</a></li>
+<li><a href="#org3add232">18. Hello World in C</a></li>
+<li><a href="#org674c123">19. Compile and Run C</a></li>
+<li><a href="#org4cf9fc0">20. Hello World in OpenMP</a></li>
+<li><a href="#org82b164c">21. Compile and Run OpenMP</a></li>
+<li><a href="#org528a506">22. Part 2</a></li>
+<li><a href="#org9e10155">23. Agenda</a></li>
+<li><a href="#org385c7fe">24. Script for Running OpenMP Jobs</a></li>
+<li><a href="#org1f202c7">25. Using script.sh script</a></li>
+<li><a href="#org753d4f6">26. Fork-Join Model&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ATTACH">ATTACH</span></span></a>
+<ul>
+<li><a href="#orgcfc5628">26.1. Parallel Region</a></li>
+</ul>
+</li>
+<li><a href="#org6a9f46f">27. OpenMP Constructs and Clause</a></li>
+<li><a href="#org7130ab7">28. OpenMP Constructs</a>
+<ul>
+<li><a href="#org909256c">28.1. Common constructs:</a></li>
+</ul>
+</li>
+<li><a href="#orgd3797c4">29. OpenMP Clause</a>
+<ul>
+<li><a href="#org2ef515e">29.1. Common clauses:</a></li>
+</ul>
+</li>
+<li><a href="#org01cba58">30. Assigning Number of Threads</a>
+<ul>
+<li><a href="#org1f74705">30.1. Using Environment Variables</a></li>
+<li><a href="#org719543b">30.2. Using OpenMP Clause</a></li>
+<li><a href="#orga5398f3">30.3. Using Runtime Routine</a></li>
+</ul>
+</li>
+<li><a href="#org9921f08">31. Assigning Number of Threads — Order of Precedence</a></li>
+<li><a href="#orgbba6053">32. Assigning Number of Threads (Example)</a></li>
+<li><a href="#org2fc6f84">33. Runtime Library Routines</a></li>
+<li><a href="#org1b02e1f">34. Printing thread id of each thread (Example)</a></li>
+<li><a href="#org5bded00">35. Part 3</a></li>
+<li><a href="#org7fa5f39">36. Agenda</a></li>
+<li><a href="#org1614413">37. OpenMP Memory Model</a></li>
+<li><a href="#org60cad60">38. Data Scoping Clauses</a></li>
+<li><a href="#orgf5224d4">39. Printing thread id of each thread (Example)</a></li>
+<li><a href="#org1d72a18">40. Private</a></li>
+<li><a href="#org3179897">41. Private Example</a></li>
+<li><a href="#org5714286">42. Shared</a></li>
+<li><a href="#org1cca8e7">43. Shared Example</a></li>
+<li><a href="#org99d3b98">44. Firstprivate</a></li>
+<li><a href="#orgd43a22a">45. Firstprivate Example</a></li>
+<li><a href="#org761d1db">46. Benefits of Firstprivate Clause</a></li>
+<li><a href="#orgae4e14f">47. Default</a></li>
+<li><a href="#orgca2c7e0">48. Default Example</a></li>
+<li><a href="#org3582684">49. Part 4</a></li>
+<li><a href="#orgffbae45">50. Agenda</a></li>
+<li><a href="#orgf07fff7">51. Work-sharing Constructs</a>
+<ul>
+<li><a href="#org14ed3b2">51.1. They are used to divide the work of:</a></li>
+<li><a href="#org6e98c1b">51.2. Commonly used:</a></li>
+</ul>
+</li>
+<li><a href="#org95be1fe">52. For Construct</a></li>
+<li><a href="#orge238e4a">53. Lastprivate</a>
+<ul>
+<li><a href="#org4313af3">53.1. Similar to private:</a></li>
+<li><a href="#org4bac51e">53.2. Syntax:</a></li>
+</ul>
+</li>
+<li><a href="#org4009c7b">54. Lastprivate Example</a></li>
+<li><a href="#orgfae2dc4">55. Creating Data Parallelly</a></li>
+<li><a href="#org66c654c">56. Conditional Compilation</a></li>
+<li><a href="#orgd133cb7">57. Conditional Compilation Example</a></li>
+<li><a href="#org2337327">58. Part 5</a></li>
+<li><a href="#org45ba133">59. Agenda</a></li>
+<li><a href="#org3b6cc07">60. OpenMP Scheduling</a>
+<ul>
+<li><a href="#org14ae1ad">60.1. Goal:</a></li>
+<li><a href="#orgadc3f9e">60.2. Types:</a></li>
+<li><a href="#org9724302">60.3. Syntax:</a></li>
+<li><a href="#org0c9a9db">60.4. Using environment variable:</a></li>
+<li><a href="#org82cc441">60.5. Kind values:</a></li>
+<li><a href="#orgf12e00a">60.6. Chunksize values:</a></li>
+</ul>
+</li>
+<li><a href="#org98f59fd">61. Static Scheduling</a>
+<ul>
+<li><a href="#org95d6d08">61.1. Syntax:</a></li>
+</ul>
+</li>
+<li><a href="#orgb3c814a">62. Dynamic Scheduling</a>
+<ul>
+<li><a href="#org82fc37f">62.1. Syntax:</a></li>
+</ul>
+</li>
+<li><a href="#orgee9592c">63. Guided Scheduling</a>
+<ul>
+<li><a href="#orgba0fafc">63.1. Syntax:</a></li>
+</ul>
+</li>
+<li><a href="#org230b3d7">64. Runtime Scheduling</a></li>
+<li><a href="#orga4f65a9">65. Part 6</a></li>
+<li><a href="#org88823ad">66. Agenda</a></li>
+<li><a href="#orgf1bdc67">67. Runtime Routines for Scheduling</a>
+<ul>
+<li><a href="#org5726035">67.1. Example:</a></li>
+<li><a href="#orgf0a756a">67.2. Other types:</a></li>
+</ul>
+</li>
+<li><a href="#org1e66bc6">68. OpenMP Barrier</a></li>
+<li><a href="#org558f5f5">69. OpenMP Single</a></li>
+<li><a href="#org3156203">70. OpenMP Master</a></li>
+<li><a href="#orgd74056b">71. OpenMP Critical</a></li>
+<li><a href="#orgf13c8bc">72. Part 7</a></li>
+<li><a href="#org0fa5606">73. Agenda</a></li>
+<li><a href="#orgea19c95">74. Synchronization</a>
+<ul>
+<li><a href="#org84cec80">74.1. Common synchronization constructs:</a></li>
+</ul>
+</li>
+<li><a href="#org1f3c4f3">75. OpenMP Critical (again)</a></li>
+<li><a href="#orgd05135d">76. Reduction</a></li>
+<li><a href="#org2a63142">77. Measuring Time</a></li>
+<li><a href="#org54ffd85">78. Part 8</a></li>
+<li><a href="#org8e3fa98">79. Agenda</a></li>
+<li><a href="#org03602c2">80. Atomic</a></li>
+<li><a href="#orga316560">81. Problem</a></li>
+<li><a href="#orgcaa6bef">82. Assignment</a></li>
+<li><a href="#orgbe9bfa5">83. Part 9</a></li>
+<li><a href="#orgdc36e5e">84. Agenda</a></li>
+<li><a href="#org0b2cbd9">85. Sections</a></li>
+<li><a href="#org7624e07">86. Nowait</a></li>
+<li><a href="#org1764bdb">87. Assignment</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org3c183c2" class="outline-2">
+<h2 id="org3c183c2"><span class="section-number-2">1.</span> <a href="https://github.com/CISSSCO/workshop.git">GitHub</a></h2>
+</div>
+<div id="outline-container-org077cdbb" class="outline-2">
+<h2 id="org077cdbb"><span class="section-number-2">2.</span> Setting up environment</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org24ca186" class="outline-3">
+<h3 id="org24ca186"><span class="section-number-3">2.1.</span> compile</h3>
+<div class="outline-text-3" id="text-2-1">
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #c678dd;">source</span> /scratch/$<span style="color: #dcaeea;">USER</span>/spack/share/spack/setup-env.sh
+spack load gcc/6qthuq2
+<span style="color: #c678dd;">export</span> <span style="color: #dcaeea;">PATH</span>=<span style="color: #98be65;">"/home/abhishekraj.cdac/.local/gitpush:</span><span style="color: #a9a1e1;">$</span><span style="color: #dcaeea;">PATH</span><span style="color: #98be65;">"</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf5310ab" class="outline-3">
+<h3 id="orgf5310ab"><span class="section-number-3">2.2.</span> run</h3>
+<div class="outline-text-3" id="text-2-2">
+<div class="org-src-container">
+<pre class="src src-bash">
+<span style="color: #5B6268;">#</span><span style="color: #5B6268;">!/bin/bash
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH -N 1                                    # Nodes = 1
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --ntasks-per-node=40                    # Tasks on each node = 40 
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --job-name=omp                          # Specify job name
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --output=%J.out                         # Name of your output file (%J is replaced with job_id)
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --error=%J.err                          # Name of your error file
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --time=1-00:00:00                       # Specify time taken to run your script
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --partition=cpu                         # Specify partition (cpu, gpu, hm)
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --reservation=hpcws
+</span>
+<span style="color: #c678dd;">ulimit</span> -s unlimited
+
+./$<span style="color: #dcaeea;">1</span>
+
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgb8f7679" class="outline-2">
+<h2 id="orgb8f7679"><span class="section-number-2">3.</span> Part 1</h2>
+</div>
+
+<div id="outline-container-org0ee233c" class="outline-2">
+<h2 id="org0ee233c"><span class="section-number-2">4.</span> Agenda</h2>
+<div class="outline-text-2" id="text-4">
+<ul class="org-ul">
+<li>What is Parallel Programming?</li>
+<li>Why Parallel Programming?</li>
+<li>Concurrency vs Parallelism</li>
+<li>Terminology</li>
+<li>What is OpenMP?</li>
+<li>Hello World in OpenMP.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org60ba658" class="outline-2">
+<h2 id="org60ba658"><span class="section-number-2">5.</span> Serial Computing</h2>
+<div class="outline-text-2" id="text-5">
+<ul class="org-ul">
+<li>Problem is broken into stream of instructions that are executed sequentially one after the other on a single processor.</li>
+<li>One instruction executes at a time.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orge1c2b46" class="outline-2">
+<h2 id="orge1c2b46"><span class="section-number-2">6.</span> Parallel Computing</h2>
+<div class="outline-text-2" id="text-6">
+<ul class="org-ul">
+<li>Doing things simultaneously</li>
+<li>Same thing or different thing</li>
+<li>Solving one large problem</li>
+
+<li>Here things refers to programs or tasks (parts of programs).</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgb9f4a6a" class="outline-2">
+<h2 id="orgb9f4a6a"><span class="section-number-2">7.</span> Why Parallel Computing</h2>
+<div class="outline-text-2" id="text-7">
+<ul class="org-ul">
+<li>Handling complex tasks</li>
+<li>Improved performance</li>
+<li>Better resource utilization</li>
+<li>Scalability</li>
+<li>Save time</li>
+<li>Save money</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgadbaf38" class="outline-2">
+<h2 id="orgadbaf38"><span class="section-number-2">8.</span> Applications of Parallel Computing</h2>
+<div class="outline-text-2" id="text-8">
+<ul class="org-ul">
+<li>Data mining</li>
+<li>Real-time simulations</li>
+<li>Scientific calculations</li>
+<li>Graphical applications</li>
+<li>AI and Machine Learning, etc.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org9390d8d" class="outline-2">
+<h2 id="org9390d8d"><span class="section-number-2">9.</span> Serial Computing vs Parallel Computing&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ATTACH">ATTACH</span></span></h2>
+<div class="outline-text-2" id="text-9">
+
+<div id="org31ad4f7" class="figure">
+<p><img src="file:///home/abhi581b/org/.attach/ae/6f9ae3-a3d0-46ad-84c9-6b10fb553c54/_20251109_211039Parallel-vs-sequential-programming.png" alt="_20251109_211039Parallel-vs-sequential-programming.png" width="700px" />
+</p>
+</div>
+</div>
+<div id="outline-container-orgd0f4335" class="outline-3">
+<h3 id="orgd0f4335"><span class="section-number-3">9.1.</span> Serial Computing</h3>
+<div class="outline-text-3" id="text-9-1">
+<ul class="org-ul">
+<li>Problem is broken into stream of instructions executed one after the other by a single core.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org7e21bd4" class="outline-3">
+<h3 id="org7e21bd4"><span class="section-number-3">9.2.</span> Parallel Computing</h3>
+<div class="outline-text-3" id="text-9-2">
+<ul class="org-ul">
+<li>Problem is broken into parts that can be solved concurrently.</li>
+<li>Each part is further broken into stream of instructions.</li>
+<li>Instructions from different parts execute simultaneously on different processors.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="outline-container-org54e4693" class="outline-2">
+<h2 id="org54e4693"><span class="section-number-2">10.</span> Concurrency vs Parallelism&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ATTACH">ATTACH</span></span></h2>
+<div class="outline-text-2" id="text-10">
+
+<div id="org81c7321" class="figure">
+<p><img src="file:///home/abhi581b/org/.attach/e0/fc86cd-4306-481c-b38d-7d2e0e080c1d/_20251109_2117341*cbFp5h440Mo0gOlY-A7Scg.jpeg" alt="_20251109_2117341*cbFp5h440Mo0gOlY-A7Scg.jpeg" width="700px" />
+</p>
+</div>
+</div>
+<div id="outline-container-org8e53a32" class="outline-3">
+<h3 id="org8e53a32"><span class="section-number-3">10.1.</span> Concurrency</h3>
+<div class="outline-text-3" id="text-10-1">
+<p>
+Making progress on more than one task - seemingly at the same time.
+</p>
+</div>
+</div>
+<div id="outline-container-org5324763" class="outline-3">
+<h3 id="org5324763"><span class="section-number-3">10.2.</span> Parallelism</h3>
+<div class="outline-text-3" id="text-10-2">
+<p>
+Splitting a single task into subtasks which can be executed in parallel.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgc8b0391" class="outline-2">
+<h2 id="orgc8b0391"><span class="section-number-2">11.</span> Types of Parallelism</h2>
+<div class="outline-text-2" id="text-11">
+</div>
+<div id="outline-container-orgcf7ae3c" class="outline-3">
+<h3 id="orgcf7ae3c"><span class="section-number-3">11.1.</span> Task Parallelism</h3>
+<div class="outline-text-3" id="text-11-1">
+<p>
+Tasks are divided between number of processes/cores.
+</p>
+</div>
+</div>
+<div id="outline-container-orgbd645c2" class="outline-3">
+<h3 id="orgbd645c2"><span class="section-number-3">11.2.</span> Data Parallelism</h3>
+<div class="outline-text-3" id="text-11-2">
+<ul class="org-ul">
+<li>Data is divided between number of processes/cores.</li>
+<li>They all perform similar tasks.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="outline-container-org2623a71" class="outline-2">
+<h2 id="org2623a71"><span class="section-number-2">12.</span> General Parallel Computing Terminology</h2>
+<div class="outline-text-2" id="text-12">
+<ul class="org-ul">
+<li>Shared Memory</li>
+<li>Distributed Memory</li>
+<li>Node</li>
+<li>Core</li>
+<li>CPU</li>
+<li>Process</li>
+<li>Thread</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgf4a3fde" class="outline-2">
+<h2 id="orgf4a3fde"><span class="section-number-2">13.</span> Shared Memory&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ATTACH">ATTACH</span></span></h2>
+<div class="outline-text-2" id="text-13">
+
+<div id="org6388a4e" class="figure">
+<p><img src="file:///home/abhi581b/org/.attach/88/be0043-790c-4093-bef0-d71d9a565734/_20251109_2105467tbYe.png" alt="_20251109_2105467tbYe.png" width="700px" />
+</p>
+</div>
+
+<ul class="org-ul">
+<li>Memory is shared between multiple CPU/cores.</li>
+<li>OpenMP is used.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org92ce7c4" class="outline-2">
+<h2 id="org92ce7c4"><span class="section-number-2">14.</span> Distributed Memory&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ATTACH">ATTACH</span></span></h2>
+<div class="outline-text-2" id="text-14">
+
+<div id="orgdd3ea9a" class="figure">
+<p><img src="file:///home/abhi581b/org/.attach/5a/d40a64-45e0-4d6e-9bbd-6d809c7e0b24/_20251109_210837UzaWGc5.jpg" alt="_20251109_210837UzaWGc5.jpg" width="700px" />
+</p>
+</div>
+
+<ul class="org-ul">
+<li>Every CPU has their own memory space and they are connected through a network.</li>
+<li>Message Passing is used.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org9f1f95d" class="outline-2">
+<h2 id="org9f1f95d"><span class="section-number-2">15.</span> Terminology</h2>
+<div class="outline-text-2" id="text-15">
+<ul class="org-ul">
+<li><b>Node</b>: A standalone &ldquo;computer in a box.&rdquo; Usually comprised of multiple CPUs/processors/cores, memory, network interfaces, etc. Nodes are networked together to comprise a supercomputer.</li>
+<li><b>CPU</b>: Contemporary CPUs consist of one or more cores.</li>
+<li><b>Process</b>: A process is an instance of a program that is being executed or processed.</li>
+<li><b>Thread</b>: Thread is a segment of a process or a lightweight process that is managed by the scheduler independently.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org45c14ec" class="outline-2">
+<h2 id="org45c14ec"><span class="section-number-2">16.</span> What is OpenMP?</h2>
+<div class="outline-text-2" id="text-16">
+<ul class="org-ul">
+<li>OpenMP stands for Open Multi-Processing.</li>
+<li>Portable <i>shared memory</i> programming.</li>
+<li>It is an API that is used for parallelizing codes.</li>
+<li>Compatible with C/C++ and Fortran.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org34529c0" class="outline-2">
+<h2 id="org34529c0"><span class="section-number-2">17.</span> Why OpenMP?</h2>
+<div class="outline-text-2" id="text-17">
+<ul class="org-ul">
+<li>Easy to learn: Pragma based syntaxes.</li>
+<li>No need to changes the whole code (one line is enough to make your code parallel).</li>
+<li>Compiler takes care of all the complexity behind the scene of running your code.</li>
+<li>Support: Works with gcc compiler.</li>
+<li>Extra functionalities can be added using Environment Variables and Runtime-library routines.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org3add232" class="outline-2">
+<h2 id="org3add232"><span class="section-number-2">18.</span> Hello World in C</h2>
+<div class="outline-text-2" id="text-18">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(){
+    printf(<span style="color: #98be65;">"Hello, World\n"</span>);
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org674c123" class="outline-2">
+<h2 id="org674c123"><span class="section-number-2">19.</span> Compile and Run C</h2>
+<div class="outline-text-2" id="text-19">
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #5B6268;">#</span><span style="color: #5B6268;">gcc --version
+</span>gcc hello.c -o hello.out 
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #5B6268;">#</span><span style="color: #5B6268;">gcc --version
+</span>./hello.out
+<span style="color: #5B6268;">#</span><span style="color: #5B6268;">sbatch script.sh hello.out</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org4cf9fc0" class="outline-2">
+<h2 id="org4cf9fc0"><span class="section-number-2">20.</span> Hello World in OpenMP</h2>
+<div class="outline-text-2" id="text-20">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;omp.h&gt;</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(){
+<span style="color: #51afef; font-weight: bold;">    #pragma</span> omp parallel
+    {
+        printf(<span style="color: #98be65;">"Hello, World\n"</span>);
+    }
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org82b164c" class="outline-2">
+<h2 id="org82b164c"><span class="section-number-2">21.</span> Compile and Run OpenMP</h2>
+<div class="outline-text-2" id="text-21">
+<div class="org-src-container">
+<pre class="src src-bash">gcc hello_omp.c -o hello_omp.out -fopenmp
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #5B6268;">#</span><span style="color: #5B6268;">sbatch script.sh hello_omp.out
+</span>./hello_omp.out
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org528a506" class="outline-2">
+<h2 id="org528a506"><span class="section-number-2">22.</span> Part 2</h2>
+</div>
+
+<div id="outline-container-org9e10155" class="outline-2">
+<h2 id="org9e10155"><span class="section-number-2">23.</span> Agenda</h2>
+<div class="outline-text-2" id="text-23">
+<ul class="org-ul">
+<li>Understanding OpenMP code</li>
+<li>Script for running OpenMP jobs</li>
+<li>OpenMP directives</li>
+<li>Thread creation</li>
+<li>Environment Variables</li>
+<li>OpenMP Runtime Routines</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org385c7fe" class="outline-2">
+<h2 id="org385c7fe"><span class="section-number-2">24.</span> Script for Running OpenMP Jobs</h2>
+<div class="outline-text-2" id="text-24">
+<ul class="org-ul">
+<li>Create a file named <b>run.sh</b> in your code folder and paste below content in the file.</li>
+<li>After that make the file executable.</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #5B6268;">#</span><span style="color: #5B6268;">!/bin/</span><span style="color: #51afef;">bash</span><span style="color: #5B6268;">
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH -N 1                                    # Nodes = 1
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --ntasks-per-node=40                    # Tasks on each node = 40 
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --job-name=omp                          # Specify job name
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --output=%J.out                         # Name of your output file (%J is replaced with job_id)
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --error=%J.err                          # Name of your error file
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --time=1-00:00:00                       # Specify time taken to run your script
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --partition=cpu                         # Specify partition (cpu, gpu, hm)
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --reservation=hpcws.user
+</span>
+<span style="color: #c678dd;">ulimit</span> -s unlimited
+
+./$<span style="color: #dcaeea;">1</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org1f202c7" class="outline-2">
+<h2 id="org1f202c7"><span class="section-number-2">25.</span> Using script.sh script</h2>
+<div class="outline-text-2" id="text-25">
+<ul class="org-ul">
+<li>Create a file called script.sh in your folder and paste the content inside the file.</li>
+<li>Make the file executable using below command:</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #ECBE7B;">chmod</span> +x script.sh
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>Now you can run your code using below command (run on the node directly):</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-bash">./script.sh a.out
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>You can also use this if previous is not working (slurm scheduling):</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh a.out
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org753d4f6" class="outline-2">
+<h2 id="org753d4f6"><span class="section-number-2">26.</span> Fork-Join Model&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ATTACH">ATTACH</span></span></h2>
+<div class="outline-text-2" id="text-26">
+
+<div id="org5fe2318" class="figure">
+<p><img src="file:///home/abhi581b/org/.attach/81/049272-ddf6-4a78-9f94-30aff6892a5a/_20251109_212054fork_join.gif" alt="_20251109_212054fork_join.gif" width="700px" />
+</p>
+</div>
+</div>
+<div id="outline-container-orgcfc5628" class="outline-3">
+<h3 id="orgcfc5628"><span class="section-number-3">26.1.</span> Parallel Region</h3>
+<div class="outline-text-3" id="text-26-1">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp parallel
+{
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">this is the parallel region
+</span>    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">anything written here will be executed by multiple threads
+</span>}
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org6a9f46f" class="outline-2">
+<h2 id="org6a9f46f"><span class="section-number-2">27.</span> OpenMP Constructs and Clause</h2>
+<div class="outline-text-2" id="text-27">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp [constructs] [clause]
+{
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">this is the parallel region
+</span>    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">anything written here will be executed by multiple cores
+</span>}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org7130ab7" class="outline-2">
+<h2 id="org7130ab7"><span class="section-number-2">28.</span> OpenMP Constructs</h2>
+<div class="outline-text-2" id="text-28">
+<p>
+Constructs tell the compiler <b>where and how</b> to parallelize the code.
+</p>
+</div>
+<div id="outline-container-org909256c" class="outline-3">
+<h3 id="org909256c"><span class="section-number-3">28.1.</span> Common constructs:</h3>
+<div class="outline-text-3" id="text-28-1">
+<ul class="org-ul">
+<li>parallel</li>
+<li>for</li>
+<li>section</li>
+<li>atomic</li>
+<li>master</li>
+<li>single</li>
+<li>sections, etc.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="outline-container-orgd3797c4" class="outline-2">
+<h2 id="orgd3797c4"><span class="section-number-2">29.</span> OpenMP Clause</h2>
+<div class="outline-text-2" id="text-29">
+<p>
+Clauses refine how the parallelism is implemented, control thread behavior, and specify how variables are shared among threads.
+</p>
+</div>
+<div id="outline-container-org2ef515e" class="outline-3">
+<h3 id="org2ef515e"><span class="section-number-3">29.1.</span> Common clauses:</h3>
+<div class="outline-text-3" id="text-29-1">
+<ul class="org-ul">
+<li>if</li>
+<li>num_threads</li>
+<li>reduction</li>
+<li>private</li>
+<li>shared</li>
+<li>firstprivate</li>
+<li>lastprivate, etc.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="outline-container-org01cba58" class="outline-2">
+<h2 id="org01cba58"><span class="section-number-2">30.</span> Assigning Number of Threads</h2>
+<div class="outline-text-2" id="text-30">
+</div>
+<div id="outline-container-org1f74705" class="outline-3">
+<h3 id="org1f74705"><span class="section-number-3">30.1.</span> Using Environment Variables</h3>
+<div class="outline-text-3" id="text-30-1">
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #c678dd;">export</span> <span style="color: #dcaeea;">OMP_NUM_THREADS</span>=4
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org719543b" class="outline-3">
+<h3 id="org719543b"><span class="section-number-3">30.2.</span> Using OpenMP Clause</h3>
+<div class="outline-text-3" id="text-30-2">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp parallel num_threads(4)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orga5398f3" class="outline-3">
+<h3 id="orga5398f3"><span class="section-number-3">30.3.</span> Using Runtime Routine</h3>
+<div class="outline-text-3" id="text-30-3">
+<div class="org-src-container">
+<pre class="src src-C">omp_set_num_threads(7);
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org9921f08" class="outline-2">
+<h2 id="org9921f08"><span class="section-number-2">31.</span> Assigning Number of Threads — Order of Precedence</h2>
+<div class="outline-text-2" id="text-31">
+<p>
+Order of Precedence for assigning number of threads:
+</p>
+
+<ol class="org-ol">
+<li>num_threads() clause</li>
+<li>Routine calls (omp_set_num_threads)</li>
+<li>Environment variables</li>
+</ol>
+
+<p>
+If all are present → clause takes highest precedence.
+</p>
+</div>
+</div>
+<div id="outline-container-orgbba6053" class="outline-2">
+<h2 id="orgbba6053"><span class="section-number-2">32.</span> Assigning Number of Threads (Example)</h2>
+<div class="outline-text-2" id="text-32">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;omp.h&gt;</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(){
+    <span style="color: #5B6268;">//</span><span style="color: #5B6268;">omp_set_num_threads(2);
+</span><span style="color: #51afef; font-weight: bold;">    #pragma</span> omp parallel 
+    {
+        <span style="color: #5B6268;">//</span><span style="color: #5B6268;">omp_get_thread_num();
+</span>        printf(<span style="color: #98be65;">"Hello, World \n"</span> );
+    }
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org2fc6f84" class="outline-2">
+<h2 id="org2fc6f84"><span class="section-number-2">33.</span> Runtime Library Routines</h2>
+<div class="outline-text-2" id="text-33">
+<ul class="org-ul">
+<li>omp_set_num_threads(n);  
+Set number of threads, n can be any natural number.</li>
+
+<li>omp_get_num_threads();  
+Returns total number of threads inside a parallel region.  
+If called outside parallel region, returns 1.</li>
+
+<li>omp_get_thread_num();  
+Returns the id of a particular thread (unique id per thread).</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org1b02e1f" class="outline-2">
+<h2 id="org1b02e1f"><span class="section-number-2">34.</span> Printing thread id of each thread (Example)</h2>
+<div class="outline-text-2" id="text-34">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;omp.h&gt;</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(){
+    <span style="color: #5B6268;">//</span><span style="color: #5B6268;">omp_set_num_threads(2);
+</span><span style="color: #51afef; font-weight: bold;">    #pragma</span> omp parallel num_threads(7)
+    {
+        printf(<span style="color: #98be65;">"Hello, World from thread %d\n"</span>, omp_get_thread_num());
+    }
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org5bded00" class="outline-2">
+<h2 id="org5bded00"><span class="section-number-2">35.</span> Part 3</h2>
+</div>
+
+<div id="outline-container-org7fa5f39" class="outline-2">
+<h2 id="org7fa5f39"><span class="section-number-2">36.</span> Agenda</h2>
+<div class="outline-text-2" id="text-36">
+<ul class="org-ul">
+<li>OpenMP Memory Model</li>
+<li>Data scoping</li>
+<li>Work-sharing constructs</li>
+<li>OpenMP for</li>
+<li>OpenMP Error correction</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org1614413" class="outline-2">
+<h2 id="org1614413"><span class="section-number-2">37.</span> OpenMP Memory Model</h2>
+<div class="outline-text-2" id="text-37">
+<ul class="org-ul">
+<li>OpenMP uses the <b>shared memory model</b>:</li>
+<li>Most variables are <b>shared by default</b> among threads, unless specified otherwise.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org60cad60" class="outline-2">
+<h2 id="org60cad60"><span class="section-number-2">38.</span> Data Scoping Clauses</h2>
+<div class="outline-text-2" id="text-38">
+<ul class="org-ul">
+<li>shared</li>
+<li>private</li>
+<li>default</li>
+<li>firstprivate</li>
+<li>lastprivate</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgf5224d4" class="outline-2">
+<h2 id="orgf5224d4"><span class="section-number-2">39.</span> Printing thread id of each thread (Example)</h2>
+<div class="outline-text-2" id="text-39">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;omp.h&gt;</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(){
+    <span style="color: #5B6268;">//</span><span style="color: #5B6268;">omp_set_num_threads(2);
+</span><span style="color: #51afef; font-weight: bold;">    #pragma</span> omp parallel num_threads(7)
+    {
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">tid</span> = omp_get_thread_num();
+        printf(<span style="color: #98be65;">"Hello, World from thread %d\n"</span>, tid);
+    }
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org1d72a18" class="outline-2">
+<h2 id="org1d72a18"><span class="section-number-2">40.</span> Private</h2>
+<div class="outline-text-2" id="text-40">
+<ul class="org-ul">
+<li>Private means every thread has its <b>own copy</b> of the variables.</li>
+<li>Changes made inside parallel region are not visible to other threads.</li>
+<li>Variables created inside a parallel region are private by default.</li>
+</ul>
+
+<p>
+Syntax:
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">x</span> = 10, <span style="color: #dcaeea;">y</span> = 20, <span style="color: #dcaeea;">z</span>;
+<span style="color: #51afef; font-weight: bold;">#pragma</span> omp parallel private(x, y, z)
+</pre>
+</div>
+<ul class="org-ul">
+<li>Private clause can take multiple variables separated by commas.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org3179897" class="outline-2">
+<h2 id="org3179897"><span class="section-number-2">41.</span> Private Example</h2>
+<div class="outline-text-2" id="text-41">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;omp.h&gt;</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(){
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">x</span> = 10;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">y</span> = 20;
+<span style="color: #51afef; font-weight: bold;">    #pragma</span> omp parallel private(x,y)
+    {
+        printf(<span style="color: #98be65;">"Thread %d: x = %d and y = %d\n"</span>, omp_get_thread_num(), x, y);
+    }
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org5714286" class="outline-2">
+<h2 id="org5714286"><span class="section-number-2">42.</span> Shared</h2>
+<div class="outline-text-2" id="text-42">
+<ul class="org-ul">
+<li>Shared means variables are accessible to all threads.</li>
+<li>By default, most variables outside the parallel region are shared.</li>
+</ul>
+
+<p>
+Syntax:
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">x</span> = 10, <span style="color: #dcaeea;">y</span> = 20, <span style="color: #dcaeea;">z</span>;
+<span style="color: #51afef; font-weight: bold;">#pragma</span> omp parallel shared(x, y, z)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org1cca8e7" class="outline-2">
+<h2 id="org1cca8e7"><span class="section-number-2">43.</span> Shared Example</h2>
+<div class="outline-text-2" id="text-43">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;omp.h&gt;</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(){
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">x</span> = 10;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">y</span> = 20;
+<span style="color: #51afef; font-weight: bold;">    #pragma</span> omp parallel shared(x,y)
+    {
+        printf(<span style="color: #98be65;">"Thread %d: x = %d and y = %d\n"</span>, omp_get_thread_num(), x, y);
+    }
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org99d3b98" class="outline-2">
+<h2 id="org99d3b98"><span class="section-number-2">44.</span> Firstprivate</h2>
+<div class="outline-text-2" id="text-44">
+<ul class="org-ul">
+<li>Similar to private</li>
+<li>BUT copies initial values of variables from outside region to each thread’s private copy</li>
+</ul>
+
+<p>
+Syntax:
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">x</span> = 10, <span style="color: #dcaeea;">y</span> = 20, <span style="color: #dcaeea;">z</span>;
+<span style="color: #51afef; font-weight: bold;">#pragma</span> omp parallel firstprivate(x, y, z)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgd43a22a" class="outline-2">
+<h2 id="orgd43a22a"><span class="section-number-2">45.</span> Firstprivate Example</h2>
+<div class="outline-text-2" id="text-45">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;omp.h&gt;</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(){
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">x</span> = 10;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">y</span> = 20;
+<span style="color: #51afef; font-weight: bold;">    #pragma</span> omp parallel firstprivate(x,y)
+    {
+        printf(<span style="color: #98be65;">"Thread %d: x = %d and y = %d\n"</span>, omp_get_thread_num(), x, y);
+    }
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org761d1db" class="outline-2">
+<h2 id="org761d1db"><span class="section-number-2">46.</span> Benefits of Firstprivate Clause</h2>
+<div class="outline-text-2" id="text-46">
+<ul class="org-ul">
+<li>Initialization: Ensures each thread starts with same initial values</li>
+<li>Isolation: Each thread has its own copy</li>
+<li>Independence: Changes do not affect others’ values</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgae4e14f" class="outline-2">
+<h2 id="orgae4e14f"><span class="section-number-2">47.</span> Default</h2>
+<div class="outline-text-2" id="text-47">
+<p>
+Default clause specifies how variables are shared when not explicitly stated.
+</p>
+
+<p>
+Values:
+</p>
+<ul class="org-ul">
+<li>shared → default behavior</li>
+<li>none → requires explicit specification for every variable</li>
+</ul>
+
+<p>
+Syntax:
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp parallel <span style="color: #51afef;">default</span>(none)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgca2c7e0" class="outline-2">
+<h2 id="orgca2c7e0"><span class="section-number-2">48.</span> Default Example</h2>
+<div class="outline-text-2" id="text-48">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;omp.h&gt;</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(){
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">x</span> = 10;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">y</span> = 20;
+<span style="color: #51afef; font-weight: bold;">    #pragma</span> omp parallel <span style="color: #51afef;">default</span>(none) shared(x) firstprivate(y)
+    {
+        printf(<span style="color: #98be65;">"Thread %d: x = %d and y = %d\n"</span>, omp_get_thread_num(), x, y);
+    }
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org3582684" class="outline-2">
+<h2 id="org3582684"><span class="section-number-2">49.</span> Part 4</h2>
+</div>
+
+<div id="outline-container-orgffbae45" class="outline-2">
+<h2 id="orgffbae45"><span class="section-number-2">50.</span> Agenda</h2>
+<div class="outline-text-2" id="text-50">
+<ul class="org-ul">
+<li>Work-sharing constructs</li>
+<li>OpenMP for</li>
+<li>Lastprivate clause</li>
+<li>Creating data parallelly</li>
+<li>Conditional Compilation</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgf07fff7" class="outline-2">
+<h2 id="orgf07fff7"><span class="section-number-2">51.</span> Work-sharing Constructs</h2>
+<div class="outline-text-2" id="text-51">
+<p>
+Work-sharing constructs are used to distribute the workload among threads in a parallel region.
+</p>
+</div>
+<div id="outline-container-org14ed3b2" class="outline-3">
+<h3 id="org14ed3b2"><span class="section-number-3">51.1.</span> They are used to divide the work of:</h3>
+<div class="outline-text-3" id="text-51-1">
+<ul class="org-ul">
+<li>a loop</li>
+<li>a section of code</li>
+<li>or tasks among threads.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org6e98c1b" class="outline-3">
+<h3 id="org6e98c1b"><span class="section-number-3">51.2.</span> Commonly used:</h3>
+<div class="outline-text-3" id="text-51-2">
+<ul class="org-ul">
+<li>for</li>
+<li>sections</li>
+<li>single</li>
+<li>task</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="outline-container-org95be1fe" class="outline-2">
+<h2 id="org95be1fe"><span class="section-number-2">52.</span> For Construct</h2>
+<div class="outline-text-2" id="text-52">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;omp.h&gt;</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(){
+<span style="color: #51afef; font-weight: bold;">    #pragma</span> omp parallel <span style="color: #51afef;">for</span>
+    <span style="color: #51afef;">for</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; 5; i++){
+        printf(<span style="color: #98be65;">"Hello, World\n"</span>);
+    }
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orge238e4a" class="outline-2">
+<h2 id="orge238e4a"><span class="section-number-2">53.</span> Lastprivate</h2>
+<div class="outline-text-2" id="text-53">
+<p>
+The lastprivate clause is used to preserve the value of a variable from the <b>last iteration</b>.
+</p>
+</div>
+<div id="outline-container-org4313af3" class="outline-3">
+<h3 id="org4313af3"><span class="section-number-3">53.1.</span> Similar to private:</h3>
+<div class="outline-text-3" id="text-53-1">
+<ul class="org-ul">
+<li>Values are private inside parallel region</li>
+<li>BUT the final iteration&rsquo;s value gets copied back.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org4bac51e" class="outline-3">
+<h3 id="org4bac51e"><span class="section-number-3">53.2.</span> Syntax:</h3>
+<div class="outline-text-3" id="text-53-2">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp parallel <span style="color: #51afef;">for</span> lastprivate(x, y, z)
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org4009c7b" class="outline-2">
+<h2 id="org4009c7b"><span class="section-number-2">54.</span> Lastprivate Example</h2>
+<div class="outline-text-2" id="text-54">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;omp.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(){
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">x</span> = 10;
+<span style="color: #51afef; font-weight: bold;">    #pragma</span> omp parallel lastprivate(x,y)
+    {
+        x  = rand() % 100 + 1;
+        printf(<span style="color: #98be65;">"Thread %d: x = %d\n"</span>, omp_get_thread_num(), x);
+    }
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgfae2dc4" class="outline-2">
+<h2 id="orgfae2dc4"><span class="section-number-2">55.</span> Creating Data Parallelly</h2>
+<div class="outline-text-2" id="text-55">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;omp.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">N</span> 100
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(){
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">arr</span>[N];
+<span style="color: #51afef; font-weight: bold;">    #pragma</span> omp parallel <span style="color: #51afef;">for</span> num_threads(10)
+    <span style="color: #51afef;">for</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; N; i++){
+        arr[i] = i + 1;
+    }
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org66c654c" class="outline-2">
+<h2 id="org66c654c"><span class="section-number-2">56.</span> Conditional Compilation</h2>
+<div class="outline-text-2" id="text-56">
+<ul class="org-ul">
+<li>Improves portability of your code.</li>
+<li>Same code can be used as serial and parallel.</li>
+
+<li>-fopenmp is used to enable openmp support.</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#ifdef</span> _OPENMP
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;omp.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#endif</span>
+
+<span style="color: #51afef; font-weight: bold;">#ifdef</span> _OPENMP
+    omp_set_num_threads(10);
+<span style="color: #51afef; font-weight: bold;">#endif</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgd133cb7" class="outline-2">
+<h2 id="orgd133cb7"><span class="section-number-2">57.</span> Conditional Compilation Example</h2>
+<div class="outline-text-2" id="text-57">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#ifdef</span> _OPENMP
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;omp.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#endif</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(){
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">tid</span> = 0;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">totalThread</span> = 0;
+<span style="color: #51afef; font-weight: bold;">#ifdef</span> _OPENMP
+    omp_set_num_threads(10);
+<span style="color: #51afef; font-weight: bold;">#endif</span>
+<span style="color: #51afef; font-weight: bold;">    #pragma</span> omp parallel
+    {
+<span style="color: #51afef; font-weight: bold;">#ifdef</span> _OPENMP
+        tid = omp_get_thread_num();
+        totalThread = omp_get_num_threads();
+<span style="color: #51afef; font-weight: bold;">#endif</span>
+        printf(<span style="color: #98be65;">"Hello from thread %d of %d\n"</span>, tid, totalThread);
+    }
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org2337327" class="outline-2">
+<h2 id="org2337327"><span class="section-number-2">58.</span> Part 5</h2>
+</div>
+
+<div id="outline-container-org45ba133" class="outline-2">
+<h2 id="org45ba133"><span class="section-number-2">59.</span> Agenda</h2>
+<div class="outline-text-2" id="text-59">
+<ul class="org-ul">
+<li>OpenMP Scheduling</li>
+<li>Static, Dynamic, Guided, Runtime</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org3b6cc07" class="outline-2">
+<h2 id="org3b6cc07"><span class="section-number-2">60.</span> OpenMP Scheduling</h2>
+<div class="outline-text-2" id="text-60">
+<p>
+Scheduling manages how iterations of a loop are distributed among threads.
+</p>
+</div>
+<div id="outline-container-org14ae1ad" class="outline-3">
+<h3 id="org14ae1ad"><span class="section-number-3">60.1.</span> Goal:</h3>
+<div class="outline-text-3" id="text-60-1">
+<ul class="org-ul">
+<li>Balance the workload across threads</li>
+<li>Minimize idle time</li>
+<li>Ensure efficient execution</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgadc3f9e" class="outline-3">
+<h3 id="orgadc3f9e"><span class="section-number-3">60.2.</span> Types:</h3>
+<div class="outline-text-3" id="text-60-2">
+<ul class="org-ul">
+<li>static</li>
+<li>dynamic</li>
+<li>guided</li>
+<li>auto</li>
+<li>runtime</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org9724302" class="outline-3">
+<h3 id="org9724302"><span class="section-number-3">60.3.</span> Syntax:</h3>
+<div class="outline-text-3" id="text-60-3">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp parallel <span style="color: #51afef;">for</span> schedule(kind, chunksize)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org0c9a9db" class="outline-3">
+<h3 id="org0c9a9db"><span class="section-number-3">60.4.</span> Using environment variable:</h3>
+<div class="outline-text-3" id="text-60-4">
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #c678dd;">export</span> <span style="color: #dcaeea;">OMP_SCHEDULE</span>=<span style="color: #98be65;">"KIND, CHUNKSIZE"</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org82cc441" class="outline-3">
+<h3 id="org82cc441"><span class="section-number-3">60.5.</span> Kind values:</h3>
+<div class="outline-text-3" id="text-60-5">
+<ul class="org-ul">
+<li>static, dynamic, guided, auto, runtime</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgf12e00a" class="outline-3">
+<h3 id="orgf12e00a"><span class="section-number-3">60.6.</span> Chunksize values:</h3>
+<div class="outline-text-3" id="text-60-6">
+<ul class="org-ul">
+<li>1, 2, 3, …, N</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="outline-container-org98f59fd" class="outline-2">
+<h2 id="org98f59fd"><span class="section-number-2">61.</span> Static Scheduling</h2>
+<div class="outline-text-2" id="text-61">
+<ul class="org-ul">
+<li>Iterations are pre-assigned to threads in contiguous chunks before loop starts.</li>
+<li>Default scheduling mode.</li>
+<li>Low overhead and predictable execution.</li>
+<li>Can lead to load imbalance if iterations have varying execution times.</li>
+</ul>
+</div>
+<div id="outline-container-org95d6d08" class="outline-3">
+<h3 id="org95d6d08"><span class="section-number-3">61.1.</span> Syntax:</h3>
+<div class="outline-text-3" id="text-61-1">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp parallel <span style="color: #51afef;">for</span> schedule(<span style="color: #51afef;">static</span>, chunksize)
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgb3c814a" class="outline-2">
+<h2 id="orgb3c814a"><span class="section-number-2">62.</span> Dynamic Scheduling</h2>
+<div class="outline-text-2" id="text-62">
+<ul class="org-ul">
+<li>Iterations assigned to threads <b>during execution</b>.</li>
+<li>Higher runtime overhead.</li>
+<li>Better for uneven workloads.</li>
+<li>Good load balancing.</li>
+</ul>
+</div>
+<div id="outline-container-org82fc37f" class="outline-3">
+<h3 id="org82fc37f"><span class="section-number-3">62.1.</span> Syntax:</h3>
+<div class="outline-text-3" id="text-62-1">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp parallel <span style="color: #51afef;">for</span> schedule(dynamic, chunksize)
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgee9592c" class="outline-2">
+<h2 id="orgee9592c"><span class="section-number-2">63.</span> Guided Scheduling</h2>
+<div class="outline-text-2" id="text-63">
+<ul class="org-ul">
+<li>Similar to dynamic but chunk size decreases exponentially.</li>
+<li>Good load balancing with reduced overhead.</li>
+<li>n specifies smallest chunk size (default is 1).</li>
+</ul>
+</div>
+<div id="outline-container-orgba0fafc" class="outline-3">
+<h3 id="orgba0fafc"><span class="section-number-3">63.1.</span> Syntax:</h3>
+<div class="outline-text-3" id="text-63-1">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp parallel <span style="color: #51afef;">for</span> schedule(guided, n)
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org230b3d7" class="outline-2">
+<h2 id="org230b3d7"><span class="section-number-2">64.</span> Runtime Scheduling</h2>
+<div class="outline-text-2" id="text-64">
+<ul class="org-ul">
+<li>Allows changing schedule type <b>without recompiling</b>.</li>
+
+<li>Compile code once using schedule(runtime)</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp parallel <span style="color: #51afef;">for</span> schedule(runtime)
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>Then set schedule externally:</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #c678dd;">export</span> <span style="color: #dcaeea;">OMP_SCHEDULE</span>=<span style="color: #98be65;">"static,3"</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orga4f65a9" class="outline-2">
+<h2 id="orga4f65a9"><span class="section-number-2">65.</span> Part 6</h2>
+</div>
+
+<div id="outline-container-org88823ad" class="outline-2">
+<h2 id="org88823ad"><span class="section-number-2">66.</span> Agenda</h2>
+<div class="outline-text-2" id="text-66">
+<ul class="org-ul">
+<li>Runtime Routines for scheduling</li>
+<li>Assigning work to a particular thread</li>
+<li>OpenMP Barrier</li>
+<li>OpenMP Single</li>
+<li>OpenMP Master</li>
+<li>OpenMP Critical</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgf1bdc67" class="outline-2">
+<h2 id="orgf1bdc67"><span class="section-number-2">67.</span> Runtime Routines for Scheduling</h2>
+<div class="outline-text-2" id="text-67">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #c678dd;">omp_set_schedule</span>(kind, chunksize)
+</pre>
+</div>
+</div>
+<div id="outline-container-org5726035" class="outline-3">
+<h3 id="org5726035"><span class="section-number-3">67.1.</span> Example:</h3>
+<div class="outline-text-3" id="text-67-1">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #ECBE7B;">omp_sched_t</span> <span style="color: #dcaeea;">kind</span> = omp_sched_static;
+<span style="color: #c678dd;">omp_set_schedule</span>(kind, 2);
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf0a756a" class="outline-3">
+<h3 id="orgf0a756a"><span class="section-number-3">67.2.</span> Other types:</h3>
+<div class="outline-text-3" id="text-67-2">
+<ul class="org-ul">
+<li>omp_sched_dynamic</li>
+<li>omp_sched_guided</li>
+<li>omp_sched_auto</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="outline-container-org1e66bc6" class="outline-2">
+<h2 id="org1e66bc6"><span class="section-number-2">68.</span> OpenMP Barrier</h2>
+<div class="outline-text-2" id="text-68">
+<ul class="org-ul">
+<li>All threads wait at this point until all threads reach it.</li>
+
+<li>Syntax:</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp barrier
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org558f5f5" class="outline-2">
+<h2 id="org558f5f5"><span class="section-number-2">69.</span> OpenMP Single</h2>
+<div class="outline-text-2" id="text-69">
+<ul class="org-ul">
+<li>Only <b>one thread</b> executes this block.</li>
+
+<li>Syntax:</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp single
+{
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">code here
+</span>}
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>(Implicit barrier unless “nowait” is used)</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org3156203" class="outline-2">
+<h2 id="org3156203"><span class="section-number-2">70.</span> OpenMP Master</h2>
+<div class="outline-text-2" id="text-70">
+<ul class="org-ul">
+<li>Only <b>master thread (thread 0)</b> executes this block.</li>
+<li>No implicit barrier after master block.</li>
+
+<li>Syntax:</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp master
+{
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">code here
+</span>}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgd74056b" class="outline-2">
+<h2 id="orgd74056b"><span class="section-number-2">71.</span> OpenMP Critical</h2>
+<div class="outline-text-2" id="text-71">
+<ul class="org-ul">
+<li>Ensures <b>only one thread</b> enters the block at a time.</li>
+<li>Prevents race conditions.</li>
+
+<li>Syntax:</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp critical
+{
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">code here
+</span>}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf13c8bc" class="outline-2">
+<h2 id="orgf13c8bc"><span class="section-number-2">72.</span> Part 7</h2>
+</div>
+
+<div id="outline-container-org0fa5606" class="outline-2">
+<h2 id="org0fa5606"><span class="section-number-2">73.</span> Agenda</h2>
+<div class="outline-text-2" id="text-73">
+<ul class="org-ul">
+<li>Synchronization in OpenMP</li>
+<li>OpenMP Critical</li>
+<li>OpenMP Atomic</li>
+<li>Sum Program</li>
+<li>Practice Q/A</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgea19c95" class="outline-2">
+<h2 id="orgea19c95"><span class="section-number-2">74.</span> Synchronization</h2>
+<div class="outline-text-2" id="text-74">
+<ul class="org-ul">
+<li>Threads share resources and memory.</li>
+<li>Without synchronization → race conditions and incorrect results.</li>
+</ul>
+</div>
+<div id="outline-container-org84cec80" class="outline-3">
+<h3 id="org84cec80"><span class="section-number-3">74.1.</span> Common synchronization constructs:</h3>
+<div class="outline-text-3" id="text-74-1">
+<ul class="org-ul">
+<li>critical</li>
+<li>barrier</li>
+<li>atomic</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="outline-container-org1f3c4f3" class="outline-2">
+<h2 id="org1f3c4f3"><span class="section-number-2">75.</span> OpenMP Critical (again)</h2>
+<div class="outline-text-2" id="text-75">
+<p>
+Protects shared variables from concurrent updates.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp critical
+{
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">code here
+</span>}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgd05135d" class="outline-2">
+<h2 id="orgd05135d"><span class="section-number-2">76.</span> Reduction</h2>
+<div class="outline-text-2" id="text-76">
+<ul class="org-ul">
+<li>Allows safe parallel accumulation.</li>
+
+<li>Syntax:</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp parallel <span style="color: #51afef;">for</span> reduction(operator: variable)
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>Example:</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">sum</span> = 0;
+<span style="color: #51afef; font-weight: bold;">#pragma</span> omp parallel <span style="color: #51afef;">for</span> reduction(+: sum)
+<span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; 10000; i++) {
+    sum += i;
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org2a63142" class="outline-2">
+<h2 id="org2a63142"><span class="section-number-2">77.</span> Measuring Time</h2>
+<div class="outline-text-2" id="text-77">
+<p>
+Use `omp_get_wtime()`:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-C">start_time = omp_get_wtime();
+
+<span style="color: #51afef; font-weight: bold;">#pragma</span> omp parallel <span style="color: #51afef;">for</span> reduction(+:sum)
+<span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; 1000000; i++) {
+    sum += i;
+}
+
+end_time = omp_get_wtime();
+printf(<span style="color: #98be65;">"Execution Time: %f seconds\n"</span>, end_time - start_time);
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org54ffd85" class="outline-2">
+<h2 id="org54ffd85"><span class="section-number-2">78.</span> Part 8</h2>
+</div>
+
+<div id="outline-container-org8e3fa98" class="outline-2">
+<h2 id="org8e3fa98"><span class="section-number-2">79.</span> Agenda</h2>
+<div class="outline-text-2" id="text-79">
+<ul class="org-ul">
+<li>Reduction</li>
+<li>OpenMP Atomic</li>
+<li>Sum Program Practice</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org03602c2" class="outline-2">
+<h2 id="org03602c2"><span class="section-number-2">80.</span> Atomic</h2>
+<div class="outline-text-2" id="text-80">
+<ul class="org-ul">
+<li>Ensures a specific update is performed indivisibly.</li>
+
+<li>Syntax:</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp atomic
+sum += arr[i];
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orga316560" class="outline-2">
+<h2 id="orga316560"><span class="section-number-2">81.</span> Problem</h2>
+<div class="outline-text-2" id="text-81">
+<p>
+Create a program to perform sum of thread ids of every thread.
+</p>
+</div>
+</div>
+<div id="outline-container-orgcaa6bef" class="outline-2">
+<h2 id="orgcaa6bef"><span class="section-number-2">82.</span> Assignment</h2>
+<div class="outline-text-2" id="text-82">
+<p>
+Create a parallel matrix multiplication program.
+</p>
+<ul class="org-ul">
+<li>Assign your data with 1.</li>
+<li>Create serial and parallel version in the same code.</li>
+<li>Measure computation time.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgbe9bfa5" class="outline-2">
+<h2 id="orgbe9bfa5"><span class="section-number-2">83.</span> Part 9</h2>
+</div>
+
+<div id="outline-container-orgdc36e5e" class="outline-2">
+<h2 id="orgdc36e5e"><span class="section-number-2">84.</span> Agenda</h2>
+<div class="outline-text-2" id="text-84">
+<ul class="org-ul">
+<li>Sections</li>
+<li>Nowait</li>
+<li>Sum of two array</li>
+<li>Prime number calculator</li>
+<li>PI calculator</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org0b2cbd9" class="outline-2">
+<h2 id="org0b2cbd9"><span class="section-number-2">85.</span> Sections</h2>
+<div class="outline-text-2" id="text-85">
+<ul class="org-ul">
+<li>Used to divide work into independent tasks.</li>
+
+<li>Syntax:</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp parallel sections
+{
+<span style="color: #51afef; font-weight: bold;">    #pragma</span> omp section
+    {
+        <span style="color: #5B6268;">//</span><span style="color: #5B6268;">task 1
+</span>    }
+<span style="color: #51afef; font-weight: bold;">    #pragma</span> omp section
+    {
+        <span style="color: #5B6268;">//</span><span style="color: #5B6268;">task 2
+</span>    }
+}
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>Implicit barrier at end unless “nowait” is used.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org7624e07" class="outline-2">
+<h2 id="org7624e07"><span class="section-number-2">86.</span> Nowait</h2>
+<div class="outline-text-2" id="text-86">
+<ul class="org-ul">
+<li>Removes implicit barrier.</li>
+
+<li>Syntax:</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#pragma</span> omp parallel sections nowait
+{
+<span style="color: #51afef; font-weight: bold;">    #pragma</span> omp section
+    {
+        <span style="color: #5B6268;">//</span><span style="color: #5B6268;">task 1
+</span>    }
+<span style="color: #51afef; font-weight: bold;">    #pragma</span> omp section
+    {
+        <span style="color: #5B6268;">//</span><span style="color: #5B6268;">task 2
+</span>    }
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org1764bdb" class="outline-2">
+<h2 id="org1764bdb"><span class="section-number-2">87.</span> Assignment</h2>
+<div class="outline-text-2" id="text-87">
+<ul class="org-ul">
+<li>Create a parallel matrix multiplication program.</li>
+<li>Assign your data with 1.</li>
+<li>Create serial and parallel version in same code.</li>
+<li>Measure computation time.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2025-11-08</p>
+<p class="author">Author: Abhishek Raj</p>
+<p class="date">Created: 2025-11-13 Thu 11:26</p>
+</div>
+</body>
+</html>

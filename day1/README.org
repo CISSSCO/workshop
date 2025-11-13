@@ -1,10 +1,11 @@
 #+TITLE: Parallel Programming Using OpenMP
 #+AUTHOR: Abhishek Raj
 #+DATE: 2025-11-08
-[[github.com/CISSSCO/workshop.git][github.com/CISSSCO/workshop.git]]
+#+PROPERTY: HEADER-ARGS+ :eval no-export
+* [[https://github.com/CISSSCO/workshop.git][GitHub]]
 * Setting up environment
 ** compile
-#+begin_src bash :session gcc14 :results output 
+#+begin_src bash :session gcc14  
 source /scratch/$USER/spack/share/spack/setup-env.sh
 spack load gcc/6qthuq2
 export PATH="/home/abhishekraj.cdac/.local/gitpush:$PATH"
@@ -72,6 +73,7 @@ ulimit -s unlimited
 :ID:       ae6f9ae3-a3d0-46ad-84c9-6b10fb553c54
 :END:
 
+#+ATTR_HTML: :width 700px
 [[attachment:_20251109_211039Parallel-vs-sequential-programming.png]]
 
 ** Serial Computing
@@ -87,6 +89,7 @@ ulimit -s unlimited
 :ID:       e0fc86cd-4306-481c-b38d-7d2e0e080c1d
 :END:
 
+#+ATTR_HTML: :width 700px
 [[attachment:_20251109_2117341*cbFp5h440Mo0gOlY-A7Scg.jpeg]]
 
 ** Concurrency
@@ -117,6 +120,7 @@ Tasks are divided between number of processes/cores.
 :ID:       88be0043-790c-4093-bef0-d71d9a565734
 :END:
 
+#+ATTR_HTML: :width 700px
 [[attachment:_20251109_2105467tbYe.png]]
 
 - Memory is shared between multiple CPU/cores.
@@ -127,6 +131,7 @@ Tasks are divided between number of processes/cores.
 :ID:       5ad40a64-45e0-4d6e-9bbd-6d809c7e0b24
 :END:
 
+#+ATTR_HTML: :width 700px
 [[attachment:_20251109_210837UzaWGc5.jpg]]
 
 - Every CPU has their own memory space and they are connected through a network.
@@ -161,14 +166,14 @@ int main(){
 #+end_src
 
 * Compile and Run C
-#+begin_src bash :session gcc14 :results output
+#+begin_src bash :session gcc14 
 #gcc --version
 gcc hello.c -o hello.out 
 #+end_src
 
 #+RESULTS:
 
-#+begin_src bash :session gcc14 :results output
+#+begin_src bash :session gcc14 
 #gcc --version
 ./hello.out
 #sbatch script.sh hello.out
@@ -191,13 +196,13 @@ int main(){
 #+end_src
 
 * Compile and Run OpenMP
-#+begin_src bash :session gcc14 :results output 
+#+begin_src bash :session gcc14  
 gcc hello_omp.c -o hello_omp.out -fopenmp
 #+end_src
 
 #+RESULTS:
 
-#+begin_src bash :session gcc14 :results output
+#+begin_src bash :session gcc14 
 #sbatch script.sh hello_omp.out
 ./hello_omp.out
 #+end_src
@@ -301,7 +306,7 @@ Hello, World
 - Create a file named *run.sh* in your code folder and paste below content in the file.
 - After that make the file executable.
 
-#+begin_src bash :tangle script.sh :session gcc14 :results output
+#+begin_src bash :tangle script.sh :session gcc14 
 #!/bin/bash
 #SBATCH -N 1                                    # Nodes = 1
 #SBATCH --ntasks-per-node=40                    # Tasks on each node = 40 
@@ -321,19 +326,19 @@ ulimit -s unlimited
 - Create a file called script.sh in your folder and paste the content inside the file.
 - Make the file executable using below command:
 
-#+begin_src bash :session gcc14 :results output
+#+begin_src bash :session gcc14 
 chmod +x script.sh
 #+end_src
 
 - Now you can run your code using below command (run on the node directly):
 
-#+begin_src bash :session gcc14 :results output
+#+begin_src bash :session gcc14 
 ./script.sh a.out
 #+end_src
 
 - You can also use this if previous is not working (slurm scheduling):
 
-#+begin_src bash :session gcc14 :results output
+#+begin_src bash :session gcc14 
 sbatch script.sh a.out
 #+end_src
 
@@ -342,6 +347,7 @@ sbatch script.sh a.out
 :ID:       81049272-ddf6-4a78-9f94-30aff6892a5a
 :END:
 
+#+ATTR_HTML: :width 700px
 [[attachment:_20251109_212054fork_join.gif]]
 
 
@@ -389,7 +395,7 @@ Clauses refine how the parallelism is implemented, control thread behavior, and 
 
 * Assigning Number of Threads
 ** Using Environment Variables
-#+begin_src bash :session gcc14 :results output
+#+begin_src bash :session gcc14 
 export OMP_NUM_THREADS=4
 #+end_src
 
@@ -610,12 +616,12 @@ int main(){
 * Work-sharing Constructs
 Work-sharing constructs are used to distribute the workload among threads in a parallel region.
 
-+ They are used to divide the work of:
+** They are used to divide the work of:
 - a loop
 - a section of code
 - or tasks among threads.
 
-+ Commonly used:
+** Commonly used:
 - for
 - sections
 - single
@@ -637,11 +643,11 @@ int main(){
 * Lastprivate
 The lastprivate clause is used to preserve the value of a variable from the *last iteration*.
 
-+ Similar to private:
+** Similar to private:
 - Values are private inside parallel region
 - BUT the final iteration's value gets copied back.
-
-+ Syntax:
+  
+** Syntax:
 #+begin_src C
 #pragma omp parallel for lastprivate(x, y, z)
 #+end_src
@@ -727,32 +733,32 @@ int main(){
 * OpenMP Scheduling
 Scheduling manages how iterations of a loop are distributed among threads.
 
-+ Goal:
+** Goal:
 - Balance the workload across threads
 - Minimize idle time
 - Ensure efficient execution
 
-+ Types:
+** Types:
 - static
 - dynamic
 - guided
 - auto
 - runtime
 
-+ Syntax:
+** Syntax:
 #+begin_src C
 #pragma omp parallel for schedule(kind, chunksize)
 #+end_src
 
-+ Using environment variable:
-#+begin_src bash :session gcc14 :results output
+** Using environment variable:
+#+begin_src bash :session gcc14 
 export OMP_SCHEDULE="KIND, CHUNKSIZE"
 #+end_src
 
-+ Kind values:
+** Kind values:
 - static, dynamic, guided, auto, runtime
-
-+ Chunksize values:
+  
+** Chunksize values:
 - 1, 2, 3, …, N
 
 * Static Scheduling
@@ -761,7 +767,7 @@ export OMP_SCHEDULE="KIND, CHUNKSIZE"
 - Low overhead and predictable execution.
 - Can lead to load imbalance if iterations have varying execution times.
 
-+ Syntax:
+** Syntax:
 #+begin_src C
 #pragma omp parallel for schedule(static, chunksize)
 #+end_src
@@ -772,7 +778,7 @@ export OMP_SCHEDULE="KIND, CHUNKSIZE"
 - Better for uneven workloads.
 - Good load balancing.
 
-+ Syntax:
+** Syntax:
 #+begin_src C
 #pragma omp parallel for schedule(dynamic, chunksize)
 #+end_src
@@ -782,7 +788,7 @@ export OMP_SCHEDULE="KIND, CHUNKSIZE"
 - Good load balancing with reduced overhead.
 - n specifies smallest chunk size (default is 1).
 
-+ Syntax:
+** Syntax:
 #+begin_src C
 #pragma omp parallel for schedule(guided, n)
 #+end_src
@@ -798,7 +804,7 @@ export OMP_SCHEDULE="KIND, CHUNKSIZE"
 
 + Then set schedule externally:
 
-#+begin_src bash :session gcc14 :results output
+#+begin_src bash :session gcc14 
 export OMP_SCHEDULE="static,3"
 #+end_src
 
@@ -818,13 +824,13 @@ export OMP_SCHEDULE="static,3"
 omp_set_schedule(kind, chunksize)
 #+end_src
 
-+ Example:
+** Example:
 #+begin_src C
 omp_sched_t kind = omp_sched_static;
 omp_set_schedule(kind, 2);
 #+end_src
 
-+ Other types:
+** Other types:
 - omp_sched_dynamic
 - omp_sched_guided
 - omp_sched_auto
@@ -888,7 +894,7 @@ omp_set_schedule(kind, 2);
 + Threads share resources and memory.
 + Without synchronization → race conditions and incorrect results.
 
-+ Common synchronization constructs:
+** Common synchronization constructs:
 - critical
 - barrier
 - atomic
@@ -1015,22 +1021,3 @@ Create a parallel matrix multiplication program.
 - Create serial and parallel version in same code.
 - Measure computation time.
 
-
-* Example codes
-- Array Addition : [[file:codes.org::arrayAddition][arrayAddition]]
-- private : [[file:codes.org::private][private]]
-- firstprivate : [[file:codes.org::firstprivate][firstprivate]]
-- lastprivate : [[file:codes.org::lastprivate][lastprivate]]
-- conditionalCompillation : [[file:codes.org::conditionalCompillation][conditionalCompillation]]
-- manualReduction : [[file:codes.org::manualReduction][manualReduction]]
-- manualReduction1 : [[file:codes.org::manualReduction1][manualReduction1]]
-- barrier : [[file:codes.org::barrier][barrier]]
-- critical : [[file:codes.org::critical][critical]]
-- dynamic : [[file:codes.org::dynamic][dynamic]]
-- dynamic1 : [[file:codes.org::dynamic1][dynamic1]]
-- static : [[file:codes.org::static][static]]
-- section : [[file:codes.org::section][section]]
-- atomic : [[file:codes.org::atomic][atomic]]
-- Matrix Addition : [[file:codes.org::matrixAddition][matrixAddition]]
-- taskParallelism : [[file:codes.org::taskParallelism][taskParallelism]]
-- taskParallelism1 : [[file:codes.org::taskParallelism1][taskParallelism1]]

@@ -1,0 +1,2541 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2025-11-13 Thu 11:51 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Message Passing Interface (MPI)</title>
+<meta name="author" content="Abhishek Raj" />
+<meta name="generator" content="Org Mode" />
+<style type="text/css">
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Message Passing Interface (MPI)</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgb281a2b">1. GitHub</a></li>
+<li><a href="#org2aa1335">2. Scripts</a>
+<ul>
+<li><a href="#org1cf5c34">2.1. compile script</a></li>
+<li><a href="#org78917f5">2.2. run script</a></li>
+</ul>
+</li>
+<li><a href="#orgbdc2683">3. Introduction to MPI</a></li>
+<li><a href="#orgbc26ca2">4. Basics of MPI</a></li>
+<li><a href="#orgcab143c">5. Processes vs Threads</a></li>
+<li><a href="#org7eb7c00">6. Distributed Memory Programming Model</a></li>
+<li><a href="#org0be45eb">7. Distributed vs Shared Memory</a></li>
+<li><a href="#org921d903">8. Why MPI?</a></li>
+<li><a href="#org223da31">9. Real-World Applications of MPI</a></li>
+<li><a href="#org87b2993">10. How MPI Works</a></li>
+<li><a href="#orgc219e2f">11. MPI Communications</a></li>
+<li><a href="#org001e242">12. Downloading and Installing MPI</a></li>
+<li><a href="#orgb17266c">13. MPI Hello World Example</a></li>
+<li><a href="#org79f6d49">14. Detailed Explanation of Hello World Code</a></li>
+<li><a href="#org90beb8d">15. Hello World in C</a>
+<ul>
+<li><a href="#orge05f03c">15.1. code</a></li>
+<li><a href="#org6605a67">15.2. compile</a></li>
+<li><a href="#orgf4108ea">15.3. run</a></li>
+</ul>
+</li>
+<li><a href="#orgc2e3116">16. Hello World in using MPI</a>
+<ul>
+<li><a href="#org64813e5">16.1. code</a></li>
+<li><a href="#orgc581e2d">16.2. compile</a></li>
+<li><a href="#org65010e0">16.3. run</a></li>
+</ul>
+</li>
+<li><a href="#orgd6bfd81">17. task1</a></li>
+<li><a href="#org149cb6a">18. MPI Communicators</a></li>
+<li><a href="#org850a8f7">19. Types of MPI Communications</a>
+<ul>
+<li><a href="#orgcaf4a45">19.1. Point-to-Point Communication:</a></li>
+<li><a href="#org74eae3f">19.2. Collective Communication:</a></li>
+</ul>
+</li>
+<li><a href="#orgc83da95">20. Point-to-point communication</a>
+<ul>
+<li><a href="#org09b154a">20.1. Sending array to process 1</a></li>
+</ul>
+</li>
+<li><a href="#orga4d60c7">21. Point-to-point communication</a>
+<ul>
+<li><a href="#org0f2e680">21.1. Sending array to process 1</a></li>
+</ul>
+</li>
+<li><a href="#org1adfaad">22. Point to point communication</a>
+<ul>
+<li><a href="#orgaef7380">22.1. Better way</a></li>
+</ul>
+</li>
+<li><a href="#org7af49b8">23. MPI Communication: Synchronous and Asynchronous</a>
+<ul>
+<li><a href="#orgbb72c01">23.1. Synchronous Communication using MPI_Send and MPI_Recv</a></li>
+<li><a href="#org5cbee22">23.2. Asynchronous Communication using MPI_Isend and MPI_Irecv</a></li>
+</ul>
+</li>
+<li><a href="#orge5a2525">24. MPI Array Sum Calculation Example</a>
+<ul>
+<li><a href="#org5fcb607">24.1. flow of your program</a></li>
+<li><a href="#org8df052e">24.2. mpi_array_sum.c</a></li>
+<li><a href="#orgf999918">24.3. Compilation and Execution</a></li>
+</ul>
+</li>
+<li><a href="#orga1ed991">25. MPI Collective Communication</a></li>
+<li><a href="#orgc8e6589">26. MPI_Bcast : Broadcasting Data</a></li>
+<li><a href="#org79d7837">27. MPI_Scatter : Distributing Data From Root</a></li>
+<li><a href="#org05e5ed3">28. MPI_Gather : Collecting Data to Root</a></li>
+<li><a href="#orgb02f7d5">29. MPI_Allgather : Collecting and Redistributing to All</a></li>
+<li><a href="#org6305ba6">30. MPI_Reduce : Reduction to a Single Result at Root</a></li>
+<li><a href="#orgceea17f">31. MPI_Allreduce : Reduction and Distribution to All</a></li>
+<li><a href="#orgb94fce4">32. MPI_Barrier : Synchronization Point</a></li>
+<li><a href="#org4c1232f">33. Array sum</a></li>
+<li><a href="#org8a73ac1">34. Array sum with Reduce</a></li>
+<li><a href="#orgb09680b">35. Array sum with and broadcasting the total sum to all the process</a></li>
+<li><a href="#org0fad33b">36. Array sum with all reduce</a></li>
+<li><a href="#orgcca032c">37. allgather</a></li>
+<li><a href="#orgda49124">38. MPI Array Sum Calculation with Timing</a>
+<ul>
+<li><a href="#org805bcdb">38.1. Introduction to MPI_Wtime</a></li>
+<li><a href="#org9104e22">38.2. Syntax</a></li>
+</ul>
+</li>
+<li><a href="#orgad81812">39. Array sum with timing</a></li>
+<li><a href="#org3ae670f">40. pi serial</a></li>
+<li><a href="#org6a85cd4">41. pi parallel</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgb281a2b" class="outline-2">
+<h2 id="orgb281a2b"><span class="section-number-2">1.</span> <a href="https://github.com/CISSSCO/workshop.git">GitHub</a></h2>
+</div>
+
+<div id="outline-container-org2aa1335" class="outline-2">
+<h2 id="org2aa1335"><span class="section-number-2">2.</span> Scripts</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org1cf5c34" class="outline-3">
+<h3 id="org1cf5c34"><span class="section-number-3">2.1.</span> compile script</h3>
+<div class="outline-text-3" id="text-2-1">
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #c678dd;">source</span> /scratch/$<span style="color: #dcaeea;">USER</span>/spack/share/spack/setup-env.sh
+spack load gcc/6qthuq2
+spack load openmpi
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org78917f5" class="outline-3">
+<h3 id="org78917f5"><span class="section-number-3">2.2.</span> run script</h3>
+<div class="outline-text-3" id="text-2-2">
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #5B6268;">#</span><span style="color: #5B6268;">!/bin/</span><span style="color: #51afef;">bash</span><span style="color: #5B6268;">
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH -N 1                                    # Nodes = 1
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --ntasks-per-node=40                    # Tasks on each node = 40 
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --job-name=omp                          # Specify job name
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --output=%J.out                         # Name of your output file (%J is replaced with job_id)
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --error=%J.err                          # Name of your error file
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --time=1-00:00:00                       # Specify time taken to run your script
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --partition=cpu                         # Specify partition (cpu, gpu, hm)
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">SBATCH --reservation=hpcws
+</span>
+<span style="color: #c678dd;">ulimit</span> -s unlimited
+
+module load gnu8/8.3.0
+module load openmpi/4.1.1
+
+<span style="color: #51afef;">if</span> [ $<span style="color: #dcaeea;">#</span> -eq 2 ]; <span style="color: #51afef;">then</span>
+    <span style="color: #dcaeea;">SLURM_NTASKS</span>=$<span style="color: #dcaeea;">2</span>
+<span style="color: #51afef;">fi</span>
+   
+
+<span style="color: #dcaeea;">cmd</span>=<span style="color: #98be65;">"mpirun -np </span><span style="color: #a9a1e1;">$</span><span style="color: #dcaeea;">SLURM_NTASKS</span><span style="color: #98be65;"> </span><span style="color: #a9a1e1;">$</span><span style="color: #dcaeea;">1</span><span style="color: #98be65;">"</span>
+<span style="color: #ECBE7B;">echo</span> <span style="color: #98be65;">"------------------------------------------------------------------"</span>
+<span style="color: #ECBE7B;">echo</span> <span style="color: #98be65;">"Command executed: </span><span style="color: #a9a1e1;">$</span><span style="color: #dcaeea;">cmd</span><span style="color: #98be65;">"</span>
+<span style="color: #ECBE7B;">echo</span> <span style="color: #98be65;">"------------------------------------------------------------------"</span>
+<span style="color: #ECBE7B;">echo</span> <span style="color: #98be65;">"##################################################################"</span>
+<span style="color: #ECBE7B;">echo</span> <span style="color: #98be65;">"##########                    OUTPUT                    ##########"</span>
+<span style="color: #ECBE7B;">echo</span> <span style="color: #98be65;">"##################################################################"</span>
+<span style="color: #ECBE7B;">echo</span>
+mpirun -np $<span style="color: #dcaeea;">SLURM_NTASKS</span> $<span style="color: #dcaeea;">1</span>
+<span style="color: #ECBE7B;">echo</span>
+<span style="color: #ECBE7B;">echo</span> <span style="color: #98be65;">"##################################################################"</span>
+<span style="color: #ECBE7B;">echo</span> <span style="color: #98be65;">"##########                     DONE                     ##########"</span>
+<span style="color: #ECBE7B;">echo</span> <span style="color: #98be65;">"##################################################################"</span>
+
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgbdc2683" class="outline-2">
+<h2 id="orgbdc2683"><span class="section-number-2">3.</span> Introduction to MPI</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+MPI (Message Passing Interface) is a standardized library for message-passing in parallel programming. It allows multiple processes to communicate and coordinate tasks across distributed-memory systems. MPI is widely used for high-performance computing applications.
+</p>
+
+<ul class="org-ul">
+<li><b><b>Key Highlights</b></b>:
+<ul class="org-ul">
+<li>Enables communication between processes running on different nodes or cores.</li>
+<li>Portable across various hardware and software platforms.</li>
+<li>Scalable to thousands or even millions of processes.</li>
+<li>Provides fine-grained control over communication patterns.</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgbc26ca2" class="outline-2">
+<h2 id="orgbc26ca2"><span class="section-number-2">4.</span> Basics of MPI</h2>
+<div class="outline-text-2" id="text-4">
+<ul class="org-ul">
+<li><b><b>Processes</b></b>:
+<ul class="org-ul">
+<li>Each instance of an MPI program is a separate process.</li>
+<li>Processes do not share memory and communicate explicitly via messages.</li>
+</ul></li>
+
+<li><b><b>Communicator</b></b>:
+<ul class="org-ul">
+<li>A group of processes that can communicate with each other.</li>
+<li>The default communicator `MPI_COMM_WORLD` includes all processes.</li>
+</ul></li>
+
+<li><b><b>Rank</b></b>:
+<ul class="org-ul">
+<li>Each process in a communicator is assigned a unique <b><b>rank</b></b> (an integer).</li>
+<li>Ranks are used to identify and address processes.</li>
+</ul></li>
+
+<li><b><b>Execution Model</b></b>:
+<ul class="org-ul">
+<li>All processes start execution from the same program code.</li>
+<li>They can follow different execution paths based on their rank.</li>
+</ul></li>
+</ul>
+
+<p>
+&#x2014;
+</p>
+</div>
+</div>
+<div id="outline-container-orgcab143c" class="outline-2">
+<h2 id="orgcab143c"><span class="section-number-2">5.</span> Processes vs Threads</h2>
+<div class="outline-text-2" id="text-5">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left"><b><b>Feature</b></b></th>
+<th scope="col" class="org-left"><b><b>Processes</b></b></th>
+<th scope="col" class="org-left"><b><b>Threads</b></b></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">Memory</td>
+<td class="org-left">Separate memory for each process.</td>
+<td class="org-left">Shared memory within the process.</td>
+</tr>
+
+<tr>
+<td class="org-left">Communication</td>
+<td class="org-left">Message passing (explicit).</td>
+<td class="org-left">Shared variables (implicit).</td>
+</tr>
+
+<tr>
+<td class="org-left">Scalability</td>
+<td class="org-left">Highly scalable.</td>
+<td class="org-left">Limited by shared memory capacity.</td>
+</tr>
+
+<tr>
+<td class="org-left">Example</td>
+<td class="org-left">MPI programs.</td>
+<td class="org-left">OpenMP programs.</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+&#x2014;
+</p>
+</div>
+</div>
+<div id="outline-container-org7eb7c00" class="outline-2">
+<h2 id="org7eb7c00"><span class="section-number-2">6.</span> Distributed Memory Programming Model</h2>
+<div class="outline-text-2" id="text-6">
+<ul class="org-ul">
+<li>In distributed memory systems, processes execute on separate nodes, each with its own private memory.</li>
+<li>Communication between processes occurs explicitly using message-passing.</li>
+
+<li><b><b>Key Characteristics</b></b>:
+<ul class="org-ul">
+<li>No shared memory: Processes cannot directly access each other’s data.</li>
+<li>Explicit communication: Processes exchange data via messages.</li>
+<li>Suitable for large-scale distributed systems like clusters and supercomputers.</li>
+</ul></li>
+</ul>
+
+<p>
+&#x2014;
+</p>
+</div>
+</div>
+<div id="outline-container-org0be45eb" class="outline-2">
+<h2 id="org0be45eb"><span class="section-number-2">7.</span> Distributed vs Shared Memory</h2>
+<div class="outline-text-2" id="text-7">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left"><b><b>Feature</b></b></th>
+<th scope="col" class="org-left"><b><b>Shared Memory</b></b></th>
+<th scope="col" class="org-left"><b><b>Distributed Memory</b></b></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><b><b>Memory Access</b></b></td>
+<td class="org-left">All threads share a global memory.</td>
+<td class="org-left">Each process has private memory.</td>
+</tr>
+
+<tr>
+<td class="org-left"><b><b>Communication</b></b></td>
+<td class="org-left">Implicit via shared variables.</td>
+<td class="org-left">Explicit via message passing.</td>
+</tr>
+
+<tr>
+<td class="org-left"><b><b>Programming Models</b></b></td>
+<td class="org-left">OpenMP, Pthreads.</td>
+<td class="org-left">MPI, Sockets.</td>
+</tr>
+
+<tr>
+<td class="org-left"><b><b>Scalability</b></b></td>
+<td class="org-left">Limited by shared memory size.</td>
+<td class="org-left">Highly scalable for large systems.</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+&#x2014;
+</p>
+</div>
+</div>
+<div id="outline-container-org921d903" class="outline-2">
+<h2 id="org921d903"><span class="section-number-2">8.</span> Why MPI?</h2>
+<div class="outline-text-2" id="text-8">
+<ol class="org-ol">
+<li><b><b>Scalability</b></b>:
+<ul class="org-ul">
+<li>Handles thousands of processes efficiently on distributed systems.</li>
+</ul></li>
+
+<li><b><b>Portability</b></b>:
+<ul class="org-ul">
+<li>Works on diverse hardware architectures and operating systems.</li>
+</ul></li>
+
+<li><b><b>Flexibility</b></b>:
+<ul class="org-ul">
+<li>Provides control over data distribution, load balancing, and communication.</li>
+</ul></li>
+
+<li><b><b>Efficiency</b></b>:
+<ul class="org-ul">
+<li>Optimized for high-performance computing on clusters and supercomputers.</li>
+</ul></li>
+</ol>
+</div>
+</div>
+<div id="outline-container-org223da31" class="outline-2">
+<h2 id="org223da31"><span class="section-number-2">9.</span> Real-World Applications of MPI</h2>
+<div class="outline-text-2" id="text-9">
+<ul class="org-ul">
+<li>Climate modeling.</li>
+<li>Computational fluid dynamics.</li>
+<li>Genome sequencing.</li>
+<li>Financial simulations.</li>
+</ul>
+
+<p>
+&#x2014;
+</p>
+</div>
+</div>
+<div id="outline-container-org87b2993" class="outline-2">
+<h2 id="org87b2993"><span class="section-number-2">10.</span> How MPI Works</h2>
+<div class="outline-text-2" id="text-10">
+<ol class="org-ol">
+<li><b><b>Initialization</b></b>:
+<ul class="org-ul">
+<li>The MPI environment is set up using `MPI_Init`.</li>
+<li>All processes start executing from the same program.</li>
+</ul></li>
+
+<li><b><b>Communication</b></b>:
+<ul class="org-ul">
+<li>Processes exchange data via point-to-point or collective communication.</li>
+<li>Use communicators (e.g., `MPI_COMM_WORLD`) to define the scope of communication.</li>
+</ul></li>
+
+<li><b><b>Synchronization</b></b>:
+<ul class="org-ul">
+<li>Processes can synchronize using barriers or other mechanisms.</li>
+</ul></li>
+
+<li><b><b>Finalization</b></b>:
+<ul class="org-ul">
+<li>The MPI environment is cleaned up using `MPI_Finalize`.</li>
+</ul></li>
+</ol>
+
+<p>
+&#x2014;
+</p>
+</div>
+</div>
+<div id="outline-container-orgc219e2f" class="outline-2">
+<h2 id="orgc219e2f"><span class="section-number-2">11.</span> MPI Communications</h2>
+<div class="outline-text-2" id="text-11">
+<ul class="org-ul">
+<li><b><b>Point-to-Point Communication</b></b>:
+<ul class="org-ul">
+<li>Direct communication between two specific processes.</li>
+<li>Example Functions:
+<ul class="org-ul">
+<li>`MPI_Send`: Sends a message.</li>
+<li>`MPI_Recv`: Receives a message.</li>
+</ul></li>
+</ul></li>
+
+<li><b><b>Collective Communication</b></b>:
+<ul class="org-ul">
+<li>Involves all processes in a communicator.</li>
+<li>Example Functions:
+<ul class="org-ul">
+<li>`MPI_Bcast`: Broadcasts a message to all processes.</li>
+<li>`MPI_Reduce`: Combines data from all processes.</li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org001e242" class="outline-2">
+<h2 id="org001e242"><span class="section-number-2">12.</span> Downloading and Installing MPI</h2>
+<div class="outline-text-2" id="text-12">
+<p>
+To get started with MPI, you need to download and install an MPI implementation. Here are general steps for downloading and installing Open MPI:
+</p>
+<ol class="org-ol">
+<li><b><b>Download Open MPI</b></b>:
+Visit the [Open MPI website](<a href="https://www.open-mpi.org">https://www.open-mpi.org</a>) and download the latest version of Open MPI.</li>
+<li><p>
+<b><b>Extract the tarball</b></b>:
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">   tar -xvf openmpi-x.y.z.tar.gz
+   <span style="color: #ECBE7B;">cd</span> openmpi-x.y.z
+</pre>
+</div></li>
+<li><p>
+<b><b>Configure, Build, and Install</b></b>:
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">   ./configure --prefix=/path/to/install
+   <span style="color: #ECBE7B;">make</span>
+   <span style="color: #ECBE7B;">make</span> install
+</pre>
+</div></li>
+<li><p>
+<b><b>Set Environment Variables</b></b>:
+Add the following lines to your `.bashrc` or `.bash_profile`:
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">   <span style="color: #c678dd;">export</span> <span style="color: #dcaeea;">PATH</span>=/path/to/install/bin:$<span style="color: #dcaeea;">PATH</span>
+   <span style="color: #c678dd;">export</span> <span style="color: #dcaeea;">LD_LIBRARY_PATH</span>=/path/to/install/lib:$<span style="color: #dcaeea;">LD_LIBRARY_PATH</span>
+</pre>
+</div></li>
+</ol>
+</div>
+</div>
+<div id="outline-container-orgb17266c" class="outline-2">
+<h2 id="orgb17266c"><span class="section-number-2">13.</span> MPI Hello World Example</h2>
+<div class="outline-text-2" id="text-13">
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;mpi.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>() {
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Initialize the MPI environment
+</span>    MPI_Init(<span style="color: #a9a1e1;">NULL</span>, <span style="color: #a9a1e1;">NULL</span>);
+
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Get the size of the communicator (number of processes)
+</span>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">world_size</span>;
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;world_size);
+
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Get the rank of the current process
+</span>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">world_rank</span>;
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;world_rank);
+
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Print a message from each process
+</span>    printf(<span style="color: #98be65;">"Hello from process %d of %d\n"</span>, world_rank, world_size);
+
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Finalize the MPI environment
+</span>    MPI_Finalize();
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+<p>
+&#x2014;
+</p>
+</div>
+</div>
+<div id="outline-container-org79f6d49" class="outline-2">
+<h2 id="org79f6d49"><span class="section-number-2">14.</span> Detailed Explanation of Hello World Code</h2>
+<div class="outline-text-2" id="text-14">
+<ol class="org-ol">
+<li><b><b>MPI_Init</b></b>:
+<ul class="org-ul">
+<li>Initializes the MPI environment.</li>
+<li>Required before calling any other MPI functions.</li>
+<li>Syntax:
+```c
+MPI_Init(&amp;argc, &amp;argv);
+```</li>
+</ul></li>
+
+<li><b><b>MPI_COMM_WORLD</b></b>:
+<ul class="org-ul">
+<li>Default communicator that includes all processes in the MPI program.</li>
+<li>Every process is part of this communicator.</li>
+</ul></li>
+
+<li><b><b>MPI_Comm_size</b></b>:
+<ul class="org-ul">
+<li>Retrieves the total number of processes in the communicator.</li>
+<li>Syntax:
+```c
+MPI_Comm_size(MPI_COMM_WORLD, &amp;world_size);
+```</li>
+<li>Example:
+<ul class="org-ul">
+<li>If there are 4 processes, `world_size` will be `4`.</li>
+</ul></li>
+</ul></li>
+
+<li><b><b>MPI_Comm_rank</b></b>:
+<ul class="org-ul">
+<li>Retrieves the rank of the current process in the communicator.</li>
+<li>Syntax:
+```c
+MPI_Comm_rank(MPI_COMM_WORLD, &amp;world_rank);
+```</li>
+<li>Example:
+<ul class="org-ul">
+<li>If there are 4 processes, their ranks will be `0`, `1`, `2`, and `3`.</li>
+</ul></li>
+</ul></li>
+
+<li><b><b>MPI_Finalize</b></b>:
+<ul class="org-ul">
+<li>Cleans up the MPI environment.</li>
+<li>Syntax:
+```c
+MPI_Finalize();
+```</li>
+</ul></li>
+</ol>
+
+<p>
+&#x2014;
+</p>
+</div>
+</div>
+<div id="outline-container-org90beb8d" class="outline-2">
+<h2 id="org90beb8d"><span class="section-number-2">15.</span> Hello World in C</h2>
+<div class="outline-text-2" id="text-15">
+</div>
+<div id="outline-container-orge05f03c" class="outline-3">
+<h3 id="orge05f03c"><span class="section-number-3">15.1.</span> code</h3>
+<div class="outline-text-3" id="text-15-1">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(){
+    printf(<span style="color: #98be65;">"Hello, World\n"</span>);
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org6605a67" class="outline-3">
+<h3 id="org6605a67"><span class="section-number-3">15.2.</span> compile</h3>
+<div class="outline-text-3" id="text-15-2">
+<div class="org-src-container">
+<pre class="src src-bash">gcc hello.c -o hello.out
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf4108ea" class="outline-3">
+<h3 id="orgf4108ea"><span class="section-number-3">15.3.</span> run</h3>
+<div class="outline-text-3" id="text-15-3">
+<div class="org-src-container">
+<pre class="src src-bash">./hello.out
+</pre>
+</div>
+
+<pre class="example">
+Hello, World
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgc2e3116" class="outline-2">
+<h2 id="orgc2e3116"><span class="section-number-2">16.</span> Hello World in using MPI</h2>
+<div class="outline-text-2" id="text-16">
+</div>
+<div id="outline-container-org64813e5" class="outline-3">
+<h3 id="org64813e5"><span class="section-number-3">16.1.</span> code</h3>
+<div class="outline-text-3" id="text-16-1">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;mpi.h&gt;</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(){
+    MPI_Init(<span style="color: #a9a1e1;">NULL</span>, <span style="color: #a9a1e1;">NULL</span>);
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">size</span>;
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">rank</span>;
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;rank);
+    printf(<span style="color: #98be65;">"Hello from process %d of %d\n"</span>, rank, size);
+    MPI_Finalize();
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgc581e2d" class="outline-3">
+<h3 id="orgc581e2d"><span class="section-number-3">16.2.</span> compile</h3>
+<div class="outline-text-3" id="text-16-2">
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #5B6268;">#</span><span style="color: #5B6268;">module load gnu8/8.3.0
+</span><span style="color: #5B6268;">#</span><span style="color: #5B6268;">module load openmpi/4.1.1
+</span>mpicc hello1.c -o hello1.out
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org65010e0" class="outline-3">
+<h3 id="org65010e0"><span class="section-number-3">16.3.</span> run</h3>
+<div class="outline-text-3" id="text-16-3">
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./hello1.out 30
+<span style="color: #5B6268;">#</span><span style="color: #5B6268;">mpirun -np 10 ./hello1.out</span>
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1166188
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgd6bfd81" class="outline-2">
+<h2 id="orgd6bfd81"><span class="section-number-2">17.</span> task1</h2>
+<div class="outline-text-2" id="text-17">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;mpi.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">N</span> 1000
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(){
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">size</span>, <span style="color: #dcaeea;">rank</span>;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">a</span>[N];
+    MPI_Init(<span style="color: #a9a1e1;">NULL</span>, <span style="color: #a9a1e1;">NULL</span>);
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;rank);
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">chunksize</span> = N / size;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">start</span> = rank * chunksize;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">end</span> = start + chunksize;
+    <span style="color: #51afef;">if</span>(rank == size - 1) end = N;
+    <span style="color: #51afef;">for</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = start; i &lt; end; i++){
+        a[i] = i + 1;
+    }
+
+    <span style="color: #51afef;">for</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = start; i &lt; end; i++){
+        printf(<span style="color: #98be65;">"%d "</span>, a[i]);
+    }
+    printf(<span style="color: #98be65;">"\n"</span>);
+    MPI_Finalize();
+}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">mpicc task1.c -o task1.out
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./task1.out 4 
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1165560
+</pre>
+</div>
+</div>
+<div id="outline-container-org149cb6a" class="outline-2">
+<h2 id="org149cb6a"><span class="section-number-2">18.</span> MPI Communicators</h2>
+<div class="outline-text-2" id="text-18">
+<p>
+Communicators in MPI define a group of processes that can communicate with each other. The default communicator is `MPI_COMM_WORLD`, which includes all the processes. Custom communicators can be created to define subgroups of processes for specific communication patterns.
+</p>
+</div>
+</div>
+<div id="outline-container-org850a8f7" class="outline-2">
+<h2 id="org850a8f7"><span class="section-number-2">19.</span> Types of MPI Communications</h2>
+<div class="outline-text-2" id="text-19">
+<p>
+MPI offers various communication mechanisms to facilitate different types of data exchanges between processes:
+</p>
+</div>
+<div id="outline-container-orgcaf4a45" class="outline-3">
+<h3 id="orgcaf4a45"><span class="section-number-3">19.1.</span> Point-to-Point Communication:</h3>
+<div class="outline-text-3" id="text-19-1">
+<ul class="org-ul">
+<li><b><b>Blocking</b></b>: The sending and receiving operations wait until the message is delivered (e.g., `MPI_Send`, `MPI_Recv`).</li>
+<li><b><b>Non-Blocking</b></b>: The operations return immediately, allowing computation and communication to overlap (e.g., `MPI_Isend`, `MPI_Irecv`).</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org74eae3f" class="outline-3">
+<h3 id="org74eae3f"><span class="section-number-3">19.2.</span> Collective Communication:</h3>
+<div class="outline-text-3" id="text-19-2">
+<p>
+These operations involve a group of processes and include:
+</p>
+<ul class="org-ul">
+<li><b><b>Broadcast</b></b>: Send data from one process to all other processes (`MPI_Bcast`).</li>
+<li><b><b>Scatter</b></b>: Distribute distinct chunks of data from one process to all processes (`MPI_Scatter`).</li>
+<li><b><b>Gather</b></b>: Collect chunks of data from all processes to one process (`MPI_Gather`).</li>
+<li><b><b>All-to-All</b></b>: Every process sends and receives distinct chunks of data (`MPI_Alltoall`).</li>
+</ul>
+<p>
+Collectives can also include operations like reductions (`MPI_Reduce`, `MPI_Allreduce`) which perform computations on data from all processes and distribute the result.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgc83da95" class="outline-2">
+<h2 id="orgc83da95"><span class="section-number-2">20.</span> Point-to-point communication</h2>
+<div class="outline-text-2" id="text-20">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">"stdio.h"</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">"mpi.h"</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">argc</span>, <span style="color: #ECBE7B;">char</span> **<span style="color: #dcaeea;">argv</span>)
+{
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">myid</span>, <span style="color: #dcaeea;">size</span>;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">myval</span>;
+
+    <span style="color: #5B6268;">//</span><span style="color: #5B6268;">MPI_Init(&amp;argc,&amp;argv);
+</span>    MPI_Init(<span style="color: #a9a1e1;">NULL</span>,<span style="color: #a9a1e1;">NULL</span>);
+
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;myid);
+
+    <span style="color: #51afef;">if</span>(myid==0){
+        myval = 100;
+        printf(<span style="color: #98be65;">"\nmyid: %d \t myval = %d"</span>, myid, myval);
+        MPI_Send(&amp;myval, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+        printf(<span style="color: #98be65;">"\nmyid: %d \t Data sent.\n"</span>, myid);
+    }
+    <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span>(myid==1){   <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Process with ID exactly equal to 1
+</span>        myval = 200;
+        MPI_Recv(&amp;myval, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        printf(<span style="color: #98be65;">"\nmyid: %d \t Data received."</span>, myid);
+        printf(<span style="color: #98be65;">"\nmyid: %d \t myval = %d"</span>, myid, myval);
+        printf(<span style="color: #98be65;">"\n\nProgram exit!\n"</span>);
+    }
+
+    <span style="color: #5B6268;">//</span><span style="color: #5B6268;">End MPI environment
+</span>    MPI_Finalize();
+}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">mpicc p2p_mpi.c -o p2p_mpi.out
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./p2p_mpi.out 2
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1166246
+</pre>
+</div>
+<div id="outline-container-org09b154a" class="outline-3">
+<h3 id="org09b154a"><span class="section-number-3">20.1.</span> Sending array to process 1</h3>
+<div class="outline-text-3" id="text-20-1">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">"stdio.h"</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">"mpi.h"</span>
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">N</span> 100
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>()
+{
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">myid</span>, <span style="color: #dcaeea;">size</span>;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">myval</span>;
+
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">arr</span>[N];
+    <span style="color: #5B6268;">//</span><span style="color: #5B6268;">Initialize MPI environment
+</span>    MPI_Init(<span style="color: #a9a1e1;">NULL</span>,<span style="color: #a9a1e1;">NULL</span>);
+
+    <span style="color: #5B6268;">//</span><span style="color: #5B6268;">Get total number of processes
+</span>    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+
+    <span style="color: #5B6268;">//</span><span style="color: #5B6268;">Get my unique ID among all processes
+</span>    MPI_Comm_rank(MPI_COMM_WORLD, &amp;myid);
+
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Process with ID exactly equal to 0
+</span>    <span style="color: #51afef;">if</span>(myid==0){
+        <span style="color: #5B6268;">//</span><span style="color: #5B6268;">Initialize data to be sent
+</span>        <span style="color: #51afef;">for</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; N; i++) arr[i] = i + 1;
+        <span style="color: #5B6268;">//</span><span style="color: #5B6268;">Send data
+</span>        MPI_Send(arr, N, MPI_INT, 1, 0, MPI_COMM_WORLD);
+        printf(<span style="color: #98be65;">"\nmyid: %d \t Data sent.\n"</span>, myid);
+    }
+    <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span>(myid==1){   <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Process with ID exactly equal to 1
+</span>        <span style="color: #5B6268;">//</span><span style="color: #5B6268;">Initializ receive array to some other data
+</span>        MPI_Recv(arr, N, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        printf(<span style="color: #98be65;">"\nmyid: %d \t Data received.\n"</span>, myid);
+        <span style="color: #5B6268;">//</span><span style="color: #5B6268;">Print received data
+</span>        <span style="color: #51afef;">for</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; N; i++)
+          printf(<span style="color: #98be65;">"%d "</span>, arr[i]);
+    }
+
+    <span style="color: #5B6268;">//</span><span style="color: #5B6268;">End MPI environment
+</span>    MPI_Finalize();
+}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">mpicc p2p_mpi_array7.c -o p2p_mpi_array7.out
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./p2p_mpi_array7.out 2
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1165590
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orga4d60c7" class="outline-2">
+<h2 id="orga4d60c7"><span class="section-number-2">21.</span> Point-to-point communication</h2>
+<div class="outline-text-2" id="text-21">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">"stdio.h"</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">"mpi.h"</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>()
+{
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">myid</span>, <span style="color: #dcaeea;">size</span>;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">myval</span>;
+    MPI_Init(<span style="color: #a9a1e1;">NULL</span>,<span style="color: #a9a1e1;">NULL</span>);
+
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;myid);
+
+    <span style="color: #51afef;">if</span>(myid==0){
+        myval = 100;
+        printf(<span style="color: #98be65;">"\nmyid: %d \t myval = %d"</span>, myid, myval);
+        <span style="color: #51afef;">for</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 1; i &lt; size; i++){
+            MPI_Send(&amp;myval, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+        }
+        printf(<span style="color: #98be65;">"\nmyid: %d \t Data sent.\n"</span>, myid);
+    }
+    <span style="color: #51afef;">else</span>{   <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Process with ID exactly equal to 1
+</span>        <span style="color: #51afef;">if</span>(myid == size - 1){
+            printf(<span style="color: #98be65;">"I left : id : %d\n"</span>, myid);
+        }
+        <span style="color: #51afef;">else</span>{
+               myval = 200;
+               MPI_Recv(&amp;myval, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+               printf(<span style="color: #98be65;">"\nmyid: %d \t Data received.\n"</span>, myid);
+               printf(<span style="color: #98be65;">"\nmyid: %d \t myval = %d\n"</span>, myid, myval);
+        }
+    }
+
+    MPI_Finalize();
+}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">mpicc p2p_mpi7.c -o p2p_mpi7.out
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./p2p_mpi7.out 4
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1166400
+</pre>
+</div>
+<div id="outline-container-org0f2e680" class="outline-3">
+<h3 id="org0f2e680"><span class="section-number-3">21.1.</span> Sending array to process 1</h3>
+<div class="outline-text-3" id="text-21-1">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">"stdio.h"</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">"mpi.h"</span>
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">N</span> 100
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>()
+{
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">myid</span>, <span style="color: #dcaeea;">size</span>;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">myval</span>;
+
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">arr</span>[N];
+    <span style="color: #5B6268;">//</span><span style="color: #5B6268;">Initialize MPI environment
+</span>    MPI_Init(<span style="color: #a9a1e1;">NULL</span>,<span style="color: #a9a1e1;">NULL</span>);
+
+    <span style="color: #5B6268;">//</span><span style="color: #5B6268;">Get total number of processes
+</span>    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+
+    <span style="color: #5B6268;">//</span><span style="color: #5B6268;">Get my unique ID among all processes
+</span>    MPI_Comm_rank(MPI_COMM_WORLD, &amp;myid);
+
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Process with ID exactly equal to 0
+</span>    <span style="color: #51afef;">if</span>(myid==0){
+        <span style="color: #5B6268;">//</span><span style="color: #5B6268;">Initialize data to be sent
+</span>        <span style="color: #51afef;">for</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; N; i++) arr[i] = i + 1;
+        <span style="color: #5B6268;">//</span><span style="color: #5B6268;">Send data
+</span>        MPI_Send(arr, N, MPI_INT, 1, 0, MPI_COMM_WORLD);
+        printf(<span style="color: #98be65;">"\nmyid: %d \t Data sent.\n"</span>, myid);
+    }
+    <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span>(myid==1){   <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Process with ID exactly equal to 1
+</span>        <span style="color: #5B6268;">//</span><span style="color: #5B6268;">Initialize receive array to some other data
+</span>        MPI_Recv(arr, N, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        printf(<span style="color: #98be65;">"\nmyid: %d \t Data received.\n"</span>, myid);
+        <span style="color: #5B6268;">//</span><span style="color: #5B6268;">Print received data
+</span>        <span style="color: #51afef;">for</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; N; i++)
+          printf(<span style="color: #98be65;">"%d "</span>, arr[i]);
+    }
+
+    <span style="color: #5B6268;">//</span><span style="color: #5B6268;">End MPI environment
+</span>    MPI_Finalize();
+}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">mpicc p2p_mpi_array9.c -o p2p_mpi_array9.out
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./p2p_mpi_array9.out 2
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1165607
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org1adfaad" class="outline-2">
+<h2 id="org1adfaad"><span class="section-number-2">22.</span> Point to point communication</h2>
+<div class="outline-text-2" id="text-22">
+<p>
+This will create 1000 send calls and 1000 recv calls which is not good for your network.
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;mpi.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">N</span> 100
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(){
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">size</span>, <span style="color: #dcaeea;">rank</span>;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">a</span>[N];
+    MPI_Init(<span style="color: #a9a1e1;">NULL</span>, <span style="color: #a9a1e1;">NULL</span>);
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;rank);
+    <span style="color: #51afef;">if</span>(rank == 0){
+        <span style="color: #51afef;">for</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; N; i++){
+                a[i] = i + 1;
+        }
+
+        <span style="color: #51afef;">for</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; N; i++){
+            MPI_Send(&amp;a[i], 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+        }
+    }
+    <span style="color: #51afef;">else</span>{
+        <span style="color: #51afef;">for</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; N; i++){
+            MPI_Recv(&amp;a[i], 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        }
+        <span style="color: #51afef;">for</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = N - 10; i &lt; N; i++){
+            printf(<span style="color: #98be65;">"%d "</span>, a[i]);
+        }
+    }
+
+    MPI_Finalize();
+}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">mpicc p2p.c -o p2p.out
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./p2p.out 2
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1165610
+</pre>
+</div>
+<div id="outline-container-orgaef7380" class="outline-3">
+<h3 id="orgaef7380"><span class="section-number-3">22.1.</span> Better way</h3>
+<div class="outline-text-3" id="text-22-1">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;mpi.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">N</span> 1000
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(){
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">size</span>, <span style="color: #dcaeea;">rank</span>;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">a</span>[N];
+    MPI_Init(<span style="color: #a9a1e1;">NULL</span>, <span style="color: #a9a1e1;">NULL</span>);
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;rank);
+    <span style="color: #51afef;">if</span>(rank == 0){
+        <span style="color: #51afef;">for</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; N; i++){
+                a[i] = i + 1;
+        }
+
+
+        MPI_Send(a, N, MPI_INT, 1, 0, MPI_COMM_WORLD);
+    }
+    <span style="color: #51afef;">else</span>{
+        MPI_Recv(a, N, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        <span style="color: #51afef;">for</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = N - 10; i &lt; N; i++){
+            printf(<span style="color: #98be65;">"%d "</span>, a[i]);
+        }
+        printf(<span style="color: #98be65;">"\n"</span>);
+    }
+
+    MPI_Finalize();
+}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">mpicc p2p1.c -o p2p1.out
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./p2p1.out 2
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1166466
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org7af49b8" class="outline-2">
+<h2 id="org7af49b8"><span class="section-number-2">23.</span> MPI Communication: Synchronous and Asynchronous</h2>
+<div class="outline-text-2" id="text-23">
+</div>
+<div id="outline-container-orgbb72c01" class="outline-3">
+<h3 id="orgbb72c01"><span class="section-number-3">23.1.</span> Synchronous Communication using MPI_Send and MPI_Recv</h3>
+<div class="outline-text-3" id="text-23-1">
+<p>
+In synchronous communication, the send operation does not complete until the matching receive operation has been started.
+</p>
+</div>
+<ol class="org-ol">
+<li><a id="org67e938d"></a>mpi_sync.c<br />
+<div class="outline-text-4" id="text-23-1-1">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;mpi.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">argc</span>, <span style="color: #ECBE7B;">char</span>** <span style="color: #dcaeea;">argv</span>) {
+    MPI_Init(&amp;argc, &amp;argv);
+
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">rank</span>;
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;rank);
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">size</span>;
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+
+    <span style="color: #51afef;">if</span> (size &lt; 2) {
+        fprintf(stderr, <span style="color: #98be65;">"World size must be greater than 1 for this example\n"</span>);
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
+
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">number</span>;
+    <span style="color: #51afef;">if</span> (rank == 0) {
+        number = -1;
+        MPI_Ssend(&amp;number, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+        printf(<span style="color: #98be65;">"Process 0 sent number %d to process 1\n"</span>, number);
+    } <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (rank == 1) {
+        MPI_Recv(&amp;number, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        printf(<span style="color: #98be65;">"Process 1 received number %d from process 0\n"</span>, number);
+    }
+
+    MPI_Finalize();
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</li>
+<li><a id="org60ecc1a"></a>Compilation and Execution (Synchronous)<br />
+<div class="outline-text-4" id="text-23-1-2">
+<ul class="org-ul">
+<li><p>
+Compile the program:
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">  mpicc mpi_sync.c -o mpi_sync.out
+</pre>
+</div></li>
+
+<li><p>
+Run the program:
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">  sbatch script.sh ./mpi_sync.out 2
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1165613
+</pre></li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div id="outline-container-org5cbee22" class="outline-3">
+<h3 id="org5cbee22"><span class="section-number-3">23.2.</span> Asynchronous Communication using MPI_Isend and MPI_Irecv</h3>
+<div class="outline-text-3" id="text-23-2">
+<p>
+In asynchronous communication, the send operation can complete before the matching receive operation starts. Non-blocking operations allow computation and communication to overlap.
+</p>
+</div>
+<ol class="org-ol">
+<li><a id="orgd05330b"></a>mpi_async.c<br />
+<div class="outline-text-4" id="text-23-2-1">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;mpi.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;unistd.h&gt;</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">argc</span>, <span style="color: #ECBE7B;">char</span>** <span style="color: #dcaeea;">argv</span>) {
+    MPI_Init(&amp;argc, &amp;argv);
+
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">rank</span>;
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;rank);
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">size</span>;
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+    <span style="color: #51afef;">if</span> (size &lt; 2) {
+        fprintf(stderr, <span style="color: #98be65;">"World size must be greater than 1 for this example\n"</span>);
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
+
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">number</span>;
+    <span style="color: #51afef;">if</span> (rank == 0) {
+        number = -1;
+        <span style="color: #ECBE7B;">MPI_Request</span> <span style="color: #dcaeea;">request</span>;
+        MPI_Isend(&amp;number, 1, MPI_INT, 1, 0, MPI_COMM_WORLD, &amp;request);
+        printf(<span style="color: #98be65;">"Process 0 sent number %d to process 1\n"</span>, number);
+    } <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (rank == 1) {
+        <span style="color: #ECBE7B;">MPI_Request</span> <span style="color: #dcaeea;">request</span>;
+        MPI_Irecv(&amp;number, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &amp;request);
+        printf(<span style="color: #98be65;">"Process 1 received number %d from process 0\n"</span>, number);
+    }
+
+    MPI_Finalize();
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</li>
+<li><a id="org3f64a59"></a>Compilation and Execution (Asynchronous)<br />
+<div class="outline-text-4" id="text-23-2-2">
+<ul class="org-ul">
+<li><p>
+Compile the program:
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">  mpicc mpi_async.c -o mpi_async.out
+</pre>
+</div></li>
+</ul>
+
+
+<ul class="org-ul">
+<li><p>
+Run the program:
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">  sbatch script.sh ./mpi_async.out 2
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1166510
+</pre></li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div id="outline-container-orge5a2525" class="outline-2">
+<h2 id="orge5a2525"><span class="section-number-2">24.</span> MPI Array Sum Calculation Example</h2>
+<div class="outline-text-2" id="text-24">
+</div>
+<div id="outline-container-org5fcb607" class="outline-3">
+<h3 id="org5fcb607"><span class="section-number-3">24.1.</span> flow of your program</h3>
+<div class="outline-text-3" id="text-24-1">
+<ul class="org-ul">
+<li>initialize mpi environment</li>
+<li>let process 0 create and initialize the whole data</li>
+<li>now process 0 will send the complete data to all other process</li>
+<li>now every process is having the complete data</li>
+<li>to define start and end for each process to allow them perform computation on their part of data only</li>
+<li>every process will start their computation of performing localsum on their part of data from start to end</li>
+<li>then each process will send their computed localsum to process 0</li>
+<li>0 should receive the localsum of each process and at the same time it should add it to a variable totalsum</li>
+<li>once your total localsum is received by all the process 0 should print the result on your screen.</li>
+<li>finalize mpi environment</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org8df052e" class="outline-3">
+<h3 id="org8df052e"><span class="section-number-3">24.2.</span> mpi_array_sum.c</h3>
+<div class="outline-text-3" id="text-24-2">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;mpi.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">argc</span>, <span style="color: #ECBE7B;">char</span>** <span style="color: #dcaeea;">argv</span>) {
+    MPI_Init(&amp;argc, &amp;argv);
+
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">world_rank</span>;
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;world_rank);
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">world_size</span>;
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;world_size);
+
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">n</span> = 10000000; <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Size of the array
+</span>    <span style="color: #ECBE7B;">int</span> *<span style="color: #dcaeea;">array</span> = <span style="color: #a9a1e1;">NULL</span>;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">chunk_size</span> = n / world_size;
+    <span style="color: #ECBE7B;">int</span>
+    <span style="color: #ECBE7B;">int</span> *sub_array = (<span style="color: #ECBE7B;">int</span>*)malloc(chunk_size * <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">int</span>));
+
+    <span style="color: #51afef;">if</span> (world_rank == 0) {
+        array = (<span style="color: #ECBE7B;">int</span>*)malloc(n * <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">int</span>));
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; n; i++) {
+            array[i] = i + 1; <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Initialize the array with values 1 to n
+</span>        }
+
+        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Distribute chunks of the array to other processes
+</span>        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 1; i &lt; world_size; i++) {
+            MPI_Send(array + i * chunk_size, chunk_size, MPI_INT, i, 0, MPI_COMM_WORLD);
+        }
+
+        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Copy the first chunk to sub_array
+</span>        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; chunk_size; i++) {
+            sub_array[i] = array[i];
+        }
+    } <span style="color: #51afef;">else</span> {
+        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Receive chunk of the array
+</span>        MPI_Recv(sub_array, chunk_size, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Compute the local sum
+</span>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">local_sum</span> = 0;
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; chunk_size; i++) {
+        local_sum += sub_array[i];
+    }
+
+    <span style="color: #51afef;">if</span> (world_rank != 0) {
+        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Send local sum to process 0
+</span>        MPI_Send(&amp;local_sum, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+    } <span style="color: #51afef;">else</span> {
+        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Process 0 receives the local sums and computes the final sum
+</span>        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">final_sum</span> = local_sum;
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">temp_sum</span>;
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 1; i &lt; world_size; i++) {
+            MPI_Recv(&amp;temp_sum, 1, MPI_INT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            final_sum += temp_sum;
+        }
+        printf(<span style="color: #98be65;">"The total sum of array elements is %d\n"</span>, final_sum);
+    }
+
+    free(sub_array);
+    <span style="color: #51afef;">if</span> (world_rank == 0) {
+        free(array);
+    }
+
+    MPI_Finalize();
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf999918" class="outline-3">
+<h3 id="orgf999918"><span class="section-number-3">24.3.</span> Compilation and Execution</h3>
+<div class="outline-text-3" id="text-24-3">
+<ul class="org-ul">
+<li><p>
+Compile the program:
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"> mpicc mpi_array_sum.c -o mpi_array_sum.out
+</pre>
+</div></li>
+
+<li><p>
+Run the program:
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">  sbatch script.sh ./mpi_array_sum.out 10
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1166533
+</pre></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="outline-container-orga1ed991" class="outline-2">
+<h2 id="orga1ed991"><span class="section-number-2">25.</span> MPI Collective Communication</h2>
+<div class="outline-text-2" id="text-25">
+<p>
+Collective communication involves <b><b>all processes within a communicator</b></b>.  
+Each process must call the same collective function, and the communication pattern is managed internally by MPI.
+</p>
+
+<p>
+Key advantages:
+</p>
+<ul class="org-ul">
+<li>More structured than point-to-point.</li>
+<li>Often faster due to optimized internal communication algorithms.</li>
+<li>Eliminates manual send/receive complexity.</li>
+</ul>
+
+<p>
+Below are the core collective operations organized into clear sections.
+</p>
+
+<p>
+&#x2014;
+</p>
+
+<p>
+<b><b>Overview of Collective Operations</b></b>
+</p>
+
+<ul class="org-ul">
+<li><b>Broadcasting</b> → One process sends data to all others.</li>
+<li><b>Scattering</b> → Root divides data and sends parts to each process.</li>
+<li><b>Gathering</b> → Root collects data from all processes.</li>
+<li><b>Allgather</b> → Each process gets the combined data from all.</li>
+<li><b>Reduction</b> → Combine values from processes using operations like sum/min/max.</li>
+<li><b>Allreduce</b> → Reduction but distribute the result to all.</li>
+<li><b>Barrier</b> → Synchronize all processes.</li>
+</ul>
+
+<p>
+&#x2014;
+</p>
+</div>
+</div>
+<div id="outline-container-orgc8e6589" class="outline-2">
+<h2 id="orgc8e6589"><span class="section-number-2">26.</span> MPI_Bcast : Broadcasting Data</h2>
+<div class="outline-text-2" id="text-26">
+<p>
+<b><b>Purpose:</b></b>  
+Ensure <b><b>every process receives the same data</b></b> from one designated root process.
+</p>
+
+
+<p>
+<b><b>Syntax:</b></b>  
+`MPI_Bcast(buffer, count, datatype, root, comm)`
+</p>
+
+<p>
+<b><b>Explanation:</b></b>
+</p>
+<ul class="org-ul">
+<li>The root process provides the initial data.</li>
+<li>After the broadcast, <b>every process, including the root</b>, contains the same value.</li>
+<li>Commonly used to distribute <b><b>input values, simulation parameters, configuration blocks</b></b>, etc.</li>
+</ul>
+
+<p>
+<b><b>Behavioral Notes:</b></b>
+</p>
+<ul class="org-ul">
+<li>All processes must call `MPI_Bcast`.</li>
+<li>Internally implemented using efficient tree or pipeline algorithms.</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;mpi.h&gt;</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">argc</span>, <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">argv</span>[]) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">rank</span>, <span style="color: #dcaeea;">size</span>;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">data</span>;
+
+    MPI_Init(&amp;argc, &amp;argv);              
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;rank); 
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;size); 
+
+    <span style="color: #51afef;">if</span> (rank == 0) {
+        data = 100;   <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Value to broadcast
+</span>        printf(<span style="color: #98be65;">"Process 0 initialized data = %d\n"</span>, data);
+    }
+
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Broadcast 'data' from root process (0) to all other processes
+</span>    MPI_Bcast(&amp;data, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    printf(<span style="color: #98be65;">"Process %d received data = %d\n"</span>, rank, data);
+
+    MPI_Finalize();
+    <span style="color: #51afef;">return</span> 0;
+}
+
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">mpicc bcast.c -o bcast.out
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./bcast.out 10
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1166573
+</pre>
+
+
+<p>
+&#x2014;
+</p>
+</div>
+</div>
+<div id="outline-container-org79d7837" class="outline-2">
+<h2 id="org79d7837"><span class="section-number-2">27.</span> MPI_Scatter : Distributing Data From Root</h2>
+<div class="outline-text-2" id="text-27">
+<p>
+<b><b>Purpose:</b></b>  
+Divide a large dataset stored at the root and <b><b>send equal-sized portions</b></b> to each process.
+</p>
+
+<p>
+<b><b>Syntax:</b></b>  
+`MPI_Scatter(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm)`
+</p>
+
+<p>
+<b><b>Explanation:</b></b>
+</p>
+<ul class="org-ul">
+<li>Root holds `sendbuf`, which contains multiple blocks (one per process).</li>
+<li>Each process receives one block into `recvbuf`.</li>
+<li>Useful for <b><b>parallelizing chunks of a large array or workload</b></b>.</li>
+</ul>
+
+<p>
+<b><b>Use Case Examples:</b></b>
+</p>
+<ul class="org-ul">
+<li>Dividing matrix rows among processes.</li>
+<li><p>
+Assigning subsets of tasks to parallel workers.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;mpi.h&gt;</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">argc</span>, <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">argv</span>[]) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">rank</span>, <span style="color: #dcaeea;">size</span>;
+    
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">recv_data</span>;
+
+    MPI_Init(&amp;argc, &amp;argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+    <span style="color: #51afef;">if</span>(rank)
+
+    MPI_Scatter(send_data, 1, MPI_INT, &amp;recv_data, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    printf(<span style="color: #98be65;">"Process %d received %d\n"</span>, rank, recv_data);
+
+    MPI_Finalize();
+    <span style="color: #51afef;">return</span> 0;
+}
+
+</pre>
+</div></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-bash">mpicc scatter.c -o scatter.out
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./scatter.out 10
+</pre>
+</div>
+<p>
+&#x2014;
+</p>
+</div>
+</div>
+<div id="outline-container-org05e5ed3" class="outline-2">
+<h2 id="org05e5ed3"><span class="section-number-2">28.</span> MPI_Gather : Collecting Data to Root</h2>
+<div class="outline-text-2" id="text-28">
+<p>
+<b><b>Purpose:</b></b>  
+Collect results or data segments from all processes and store them at the <b><b>root process</b></b>.
+</p>
+
+<p>
+<b><b>Syntax:</b></b>  
+`MPI_Gather(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm)`
+</p>
+
+<p>
+<b><b>Explanation:</b></b>
+</p>
+<ul class="org-ul">
+<li>Each process contributes `sendcount` values.</li>
+<li>Root receives all values in a <b>rank-ordered continuous buffer</b>.</li>
+<li><p>
+Commonly used at the <b><b>end of distributed computations</b></b> to assemble final results.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;mpi.h&gt;</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">argc</span>, <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">argv</span>[]) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">rank</span>, <span style="color: #dcaeea;">size</span>;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">send_val</span>;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">recv_data</span>[4];
+
+    MPI_Init(&amp;argc, &amp;argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+
+    send_val = rank + 1;
+
+    MPI_Gather(&amp;send_val, 1, MPI_INT, recv_data, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    <span style="color: #51afef;">if</span> (rank == 0) {
+        printf(<span style="color: #98be65;">"Root process collected: "</span>);
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; size; i++)
+            printf(<span style="color: #98be65;">"%d "</span>, recv_data[i]);
+        printf(<span style="color: #98be65;">"\n"</span>);
+    }
+
+    MPI_Finalize();
+    <span style="color: #51afef;">return</span> 0;
+}
+
+</pre>
+</div></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-bash">mpicc gather.c -o gather.out
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./gather.out 10
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1166576
+</pre>
+
+
+<p>
+&#x2014;
+</p>
+</div>
+</div>
+<div id="outline-container-orgb02f7d5" class="outline-2">
+<h2 id="orgb02f7d5"><span class="section-number-2">29.</span> MPI_Allgather : Collecting and Redistributing to All</h2>
+<div class="outline-text-2" id="text-29">
+<p>
+<b><b>Purpose:</b></b>  
+Like `MPI_Gather`, but <b><b>every process receives the full collected dataset</b></b>.
+</p>
+
+<p>
+<b><b>Syntax:</b></b>  
+`MPI_Allgather(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm)`
+</p>
+
+<p>
+<b><b>Explanation:</b></b>
+</p>
+<ul class="org-ul">
+<li>Useful when tasks need access to each other&rsquo;s results.</li>
+<li>Eliminates the need for a gather + broadcast sequence.</li>
+</ul>
+
+<p>
+&#x2014;
+</p>
+</div>
+</div>
+<div id="outline-container-org6305ba6" class="outline-2">
+<h2 id="org6305ba6"><span class="section-number-2">30.</span> MPI_Reduce : Reduction to a Single Result at Root</h2>
+<div class="outline-text-2" id="text-30">
+<p>
+<b><b>Purpose:</b></b>  
+Combine data from all processes using a <b>reduction operation</b> (sum, max, min, etc.)
+</p>
+
+<p>
+<b><b>Syntax:</b></b>  
+`MPI_Reduce(sendbuf, recvbuf, count, datatype, operation, root, comm)`
+</p>
+
+<p>
+<b><b>Explanation:</b></b>
+</p>
+<ul class="org-ul">
+<li>The reduction is performed across all processes&rsquo; values.</li>
+<li>Only the root receives the final result.</li>
+</ul>
+
+<p>
+<b><b>Common Operations:</b></b>
+</p>
+<ul class="org-ul">
+<li><p>
+`MPI_SUM`, `MPI_MAX`, `MPI_MIN`, etc.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;mpi.h&gt;</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">argc</span>, <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">argv</span>[]) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">rank</span>, <span style="color: #dcaeea;">size</span>;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">value</span>, <span style="color: #dcaeea;">result</span>;
+
+    MPI_Init(&amp;argc, &amp;argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;rank);
+
+    value = rank + 1;   <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Example values
+</span>
+    MPI_Reduce(&amp;value, &amp;result, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    <span style="color: #51afef;">if</span> (rank == 0)
+        printf(<span style="color: #98be65;">"Sum = %d\n"</span>, result);
+
+    MPI_Finalize();
+    <span style="color: #51afef;">return</span> 0;
+}
+
+</pre>
+</div></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-bash">mpicc reduce.c -o reduce.out
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./reduce.out 10
+</pre>
+</div>
+<p>
+&#x2014;
+</p>
+</div>
+</div>
+<div id="outline-container-orgceea17f" class="outline-2">
+<h2 id="orgceea17f"><span class="section-number-2">31.</span> MPI_Allreduce : Reduction and Distribution to All</h2>
+<div class="outline-text-2" id="text-31">
+<p>
+<b><b>Purpose:</b></b>  
+Perform reduction like `MPI_Reduce`, but <b><b>send the final result to every process</b></b>.
+</p>
+
+<p>
+<b><b>Syntax:</b></b>  
+`MPI_Allreduce(sendbuf, recvbuf, count, datatype, operation, comm)`
+</p>
+
+<p>
+<b><b>Explanation:</b></b>
+</p>
+<ul class="org-ul">
+<li>Avoids requiring separate `MPI_Reduce` and `MPI_Bcast`.</li>
+<li>Frequently used inside iterative parallel algorithms (e.g., computing global convergence tolerance).</li>
+</ul>
+
+<p>
+<b><b>Typical Use Cases:</b></b>
+</p>
+<ul class="org-ul">
+<li>Global scalar values required by all processes.</li>
+<li>Performance analysis counters.</li>
+<li>Normalizing distributed vectors.</li>
+</ul>
+
+<p>
+&#x2014;
+</p>
+</div>
+</div>
+<div id="outline-container-orgb94fce4" class="outline-2">
+<h2 id="orgb94fce4"><span class="section-number-2">32.</span> MPI_Barrier : Synchronization Point</h2>
+<div class="outline-text-2" id="text-32">
+<p>
+<b><b>Purpose:</b></b>  
+Ensure all processes reach the same execution point <b>before</b> any may proceed.
+</p>
+
+<p>
+<b><b>Syntax:</b></b>  
+`MPI_Barrier(comm)`
+</p>
+
+<p>
+<b><b>Explanation:</b></b>
+</p>
+<ul class="org-ul">
+<li>No communication of data.</li>
+<li>Used to coordinate phases of computation, debugging, or timing measurements.</li>
+</ul>
+
+<p>
+<b><b>Key Effect:</b></b>
+</p>
+<ul class="org-ul">
+<li>Introduces synchronization — slows fast processes until slow processes catch up.</li>
+</ul>
+
+<p>
+&#x2014;
+</p>
+</div>
+</div>
+<div id="outline-container-org4c1232f" class="outline-2">
+<h2 id="org4c1232f"><span class="section-number-2">33.</span> Array sum</h2>
+<div class="outline-text-2" id="text-33">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;mpi.h&gt;</span>
+
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">N</span> 100
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>() {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">rank</span>, <span style="color: #dcaeea;">size</span>;
+    MPI_Init(<span style="color: #a9a1e1;">NULL</span>, <span style="color: #a9a1e1;">NULL</span>);
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">chunksize</span> = N / size;
+    <span style="color: #ECBE7B;">int</span>* <span style="color: #dcaeea;">global_arr</span> = <span style="color: #a9a1e1;">NULL</span>;
+    <span style="color: #ECBE7B;">int</span>* <span style="color: #dcaeea;">local_arr</span> = (<span style="color: #ECBE7B;">int</span>*)malloc(chunksize * <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">int</span>));
+
+    <span style="color: #51afef;">if</span> (rank == 0) {
+        global_arr = (<span style="color: #ECBE7B;">int</span>*)malloc(N * <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">int</span>));
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; N; i++) {
+            global_arr[i] = i + 1;
+        }
+    }
+
+    MPI_Scatter(global_arr, chunksize, MPI_INT, local_arr, chunksize, MPI_INT, 0, MPI_COMM_WORLD);
+
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">local_sum</span> = 0;
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; chunksize; i++) {
+        local_sum += local_arr[i];
+    }
+
+    <span style="color: #ECBE7B;">int</span>* <span style="color: #dcaeea;">global_sums</span> = <span style="color: #a9a1e1;">NULL</span>;
+    <span style="color: #51afef;">if</span> (rank == 0) {
+        global_sums = (<span style="color: #ECBE7B;">int</span>*)malloc(size * <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">int</span>));
+    }
+
+    MPI_Gather(&amp;local_sum, 1, MPI_INT, global_sums, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    <span style="color: #51afef;">if</span> (rank == 0) {
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">total_sum</span> = 0;
+        printf (<span style="color: #98be65;">"Array of local sums: \n"</span>);
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; size; i++) {
+            printf(<span style="color: #98be65;">"%d "</span>, global_sums[i]);
+            total_sum += global_sums[i];
+        }
+        printf(<span style="color: #98be65;">"\nTotal sum = %d\n"</span>, total_sum);
+        free(global_arr);
+        free(global_sums);
+    }
+
+    free(local_arr);
+    MPI_Finalize();
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">mpicc arrSum.c -o arrSum.out
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./arrSum.out 10
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1165632
+</pre>
+</div>
+</div>
+<div id="outline-container-org8a73ac1" class="outline-2">
+<h2 id="org8a73ac1"><span class="section-number-2">34.</span> Array sum with Reduce</h2>
+<div class="outline-text-2" id="text-34">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;mpi.h&gt;</span>
+
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">N</span> 100
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>() {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">rank</span>, <span style="color: #dcaeea;">size</span>;
+    MPI_Init(<span style="color: #a9a1e1;">NULL</span>, <span style="color: #a9a1e1;">NULL</span>);
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">chunksize</span> = N / size;
+    <span style="color: #ECBE7B;">int</span>* <span style="color: #dcaeea;">global_arr</span> = <span style="color: #a9a1e1;">NULL</span>;
+    <span style="color: #ECBE7B;">int</span>* <span style="color: #dcaeea;">local_arr</span> = (<span style="color: #ECBE7B;">int</span>*)malloc(chunksize * <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">int</span>));
+    <span style="color: #51afef;">if</span> (rank == 0) {
+        global_arr = (<span style="color: #ECBE7B;">int</span>*)malloc(N * <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">int</span>));
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; N; i++) {
+            global_arr[i] = i + 1;
+        }
+    }
+    MPI_Scatter(global_arr, chunksize, MPI_INT, local_arr, chunksize, MPI_INT, 0, MPI_COMM_WORLD);
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">local_sum</span> = 0;
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; chunksize; i++) {
+        local_sum += local_arr[i];
+    }
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">final_sum</span>;
+    MPI_Reduce(&amp;local_sum, &amp;final_sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    printf(<span style="color: #98be65;">"rank = %d\ttotal sum = %d\n"</span>, rank, final_sum);
+    <span style="color: #51afef;">if</span>(rank == 0){
+        free(global_arr);
+    }
+    free(local_arr);
+    MPI_Finalize();
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">mpicc arrSum_reduce.c -o arrSum_reduce.out
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./arrSum_reduce.out 10
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1165633
+</pre>
+</div>
+</div>
+<div id="outline-container-orgb09680b" class="outline-2">
+<h2 id="orgb09680b"><span class="section-number-2">35.</span> Array sum with and broadcasting the total sum to all the process</h2>
+<div class="outline-text-2" id="text-35">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;mpi.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">N</span> 10000
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>() {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">rank</span>, <span style="color: #dcaeea;">size</span>;
+    MPI_Init(<span style="color: #a9a1e1;">NULL</span>, <span style="color: #a9a1e1;">NULL</span>);
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">chunksize</span> = N / size;
+    <span style="color: #ECBE7B;">int</span>* <span style="color: #dcaeea;">global_arr</span> = <span style="color: #a9a1e1;">NULL</span>;
+    <span style="color: #ECBE7B;">int</span>* <span style="color: #dcaeea;">local_arr</span> = (<span style="color: #ECBE7B;">int</span>*)malloc(chunksize * <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">int</span>));
+    <span style="color: #51afef;">if</span> (rank == 0) {
+        global_arr = (<span style="color: #ECBE7B;">int</span>*)malloc(N * <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">int</span>));
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; N; i++) {
+            global_arr[i] = i + 1;
+        }
+    }
+    MPI_Scatter(global_arr, chunksize, MPI_INT, local_arr, chunksize, MPI_INT, 0, MPI_COMM_WORLD);
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">local_sum</span> = 0;
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; chunksize; i++) {
+        local_sum += local_arr[i];
+    }
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">final_sum</span>;
+    MPI_Reduce(&amp;local_sum, &amp;final_sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&amp;final_sum, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    printf(<span style="color: #98be65;">"rank = %d\ttotal sum = %d\n"</span>, rank, final_sum);
+    <span style="color: #51afef;">if</span>(rank == 0){
+        free(global_arr);
+    }
+    free(local_arr);
+    MPI_Finalize();
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">mpicc arrSum_reduce1.c -o arrSum_reduce1.out
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./arrSum_reduce1.out 10
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1165635
+</pre>
+</div>
+</div>
+<div id="outline-container-org0fad33b" class="outline-2">
+<h2 id="org0fad33b"><span class="section-number-2">36.</span> Array sum with all reduce</h2>
+<div class="outline-text-2" id="text-36">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;mpi.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">N</span> 10000
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>() {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">rank</span>, <span style="color: #dcaeea;">size</span>;
+    MPI_Init(<span style="color: #a9a1e1;">NULL</span>, <span style="color: #a9a1e1;">NULL</span>);
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">chunksize</span> = N / size;
+    <span style="color: #ECBE7B;">int</span>* <span style="color: #dcaeea;">global_arr</span> = <span style="color: #a9a1e1;">NULL</span>;
+    <span style="color: #ECBE7B;">int</span>* <span style="color: #dcaeea;">local_arr</span> = (<span style="color: #ECBE7B;">int</span>*)malloc(chunksize * <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">int</span>));
+    <span style="color: #51afef;">if</span> (rank == 0) {
+        global_arr = (<span style="color: #ECBE7B;">int</span>*)malloc(N * <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">int</span>));
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; N; i++) {
+            global_arr[i] = i + 1;
+        }
+    }
+    MPI_Scatter(global_arr, chunksize, MPI_INT, local_arr, chunksize, MPI_INT, 0, MPI_COMM_WORLD);
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">local_sum</span> = 0;
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; chunksize; i++) {
+        local_sum += local_arr[i];
+    }
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">final_sum</span>;
+    MPI_Allreduce(&amp;local_sum, &amp;final_sum, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+
+    printf(<span style="color: #98be65;">"rank = %d\ttotal sum = %d\n"</span>, rank, final_sum);
+    <span style="color: #51afef;">if</span>(rank == 0){
+        free(global_arr);
+    }
+    free(local_arr);
+    MPI_Finalize();
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">mpicc arrSum_allreduce.c -o arrSum_allreduce.out
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./arrSum_allreduce.out 10
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1165638
+</pre>
+</div>
+</div>
+<div id="outline-container-orgcca032c" class="outline-2">
+<h2 id="orgcca032c"><span class="section-number-2">37.</span> allgather</h2>
+<div class="outline-text-2" id="text-37">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;mpi.h&gt;</span>
+
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">N</span> 100
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>() {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">rank</span>, <span style="color: #dcaeea;">size</span>;
+    MPI_Init(<span style="color: #a9a1e1;">NULL</span>, <span style="color: #a9a1e1;">NULL</span>);
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">chunksize</span> = N / size;
+    <span style="color: #ECBE7B;">int</span>* <span style="color: #dcaeea;">global_arr</span>;
+    <span style="color: #ECBE7B;">int</span>* <span style="color: #dcaeea;">local_arr</span> = (<span style="color: #ECBE7B;">int</span>*)malloc(chunksize * <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">int</span>));
+
+    <span style="color: #51afef;">if</span> (rank == 0) {
+        global_arr = (<span style="color: #ECBE7B;">int</span>*)malloc(N * <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">int</span>));
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; N; i++) {
+            global_arr[i] = i + 1;
+        }
+    }
+
+    MPI_Scatter(global_arr, chunksize, MPI_INT, local_arr, chunksize, MPI_INT, 0, MPI_COMM_WORLD);
+
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">local_sum</span> = 0;
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; chunksize; i++) {
+        local_sum += local_arr[i];
+    }
+
+    <span style="color: #ECBE7B;">int</span>* <span style="color: #dcaeea;">global_sums</span> = <span style="color: #a9a1e1;">NULL</span>;
+    global_sums = (<span style="color: #ECBE7B;">int</span>*)malloc(size * <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">int</span>));
+
+    MPI_Allgather(&amp;local_sum, 1, MPI_INT, global_sums, 1, MPI_INT, MPI_COMM_WORLD);
+
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; size; i++) {
+        printf(<span style="color: #98be65;">"%d "</span>, global_sums[i]);
+    }
+    printf(<span style="color: #98be65;">"\n"</span>);
+    <span style="color: #51afef;">if</span>(rank == 0) free(global_arr);
+    free(global_sums);
+
+    free(local_arr);
+    MPI_Finalize();
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">mpicc task3.c -o task3.out
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./task3.out 10
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1165640
+</pre>
+</div>
+</div>
+<div id="outline-container-orgda49124" class="outline-2">
+<h2 id="orgda49124"><span class="section-number-2">38.</span> MPI Array Sum Calculation with Timing</h2>
+<div class="outline-text-2" id="text-38">
+</div>
+<div id="outline-container-org805bcdb" class="outline-3">
+<h3 id="org805bcdb"><span class="section-number-3">38.1.</span> Introduction to MPI_Wtime</h3>
+<div class="outline-text-3" id="text-38-1">
+<p>
+`MPI_Wtime` is a function in MPI that returns the elapsed wall-clock time in seconds since an arbitrary point in the past. It is used to measure the performance and execution time of parallel programs.
+</p>
+</div>
+</div>
+<div id="outline-container-org9104e22" class="outline-3">
+<h3 id="org9104e22"><span class="section-number-3">38.2.</span> Syntax</h3>
+<div class="outline-text-3" id="text-38-2">
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #ECBE7B;">double</span> <span style="color: #c678dd;">MPI_Wtime</span>(<span style="color: #ECBE7B;">void</span>);
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgad81812" class="outline-2">
+<h2 id="orgad81812"><span class="section-number-2">39.</span> Array sum with timing</h2>
+<div class="outline-text-2" id="text-39">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;mpi.h&gt;</span>
+
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>() {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">rank</span>, <span style="color: #dcaeea;">size</span>;
+    MPI_Init(<span style="color: #a9a1e1;">NULL</span>, <span style="color: #a9a1e1;">NULL</span>);
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+
+    <span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span> <span style="color: #dcaeea;">N</span> = 1000000000;
+    <span style="color: #ECBE7B;">double</span> <span style="color: #dcaeea;">startTime</span>, <span style="color: #dcaeea;">endTime</span>;
+    <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span> <span style="color: #dcaeea;">chunksize</span> = N / size;
+    <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span>* <span style="color: #dcaeea;">global_arr</span> = <span style="color: #a9a1e1;">NULL</span>;
+    <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span>* <span style="color: #dcaeea;">local_arr</span> = (<span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span>*)malloc(chunksize * <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span>));
+
+    <span style="color: #51afef;">if</span> (rank == 0) {
+        global_arr = (<span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span>*)malloc(N * <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span>));
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; N; i++) {
+            global_arr[i] = i + 1;
+        }
+    }
+
+    <span style="color: #51afef;">if</span>(rank == 0) startTime = MPI_Wtime();
+    MPI_Scatter(global_arr, chunksize, MPI_LONG_LONG_INT, local_arr, chunksize, MPI_LONG_LONG_INT, 0, MPI_COMM_WORLD);
+
+    <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span> <span style="color: #dcaeea;">local_sum</span> = 0;
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; chunksize; i++) {
+        local_sum += local_arr[i];
+    }
+
+
+    <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span>* <span style="color: #dcaeea;">global_sums</span> = <span style="color: #a9a1e1;">NULL</span>;
+    <span style="color: #51afef;">if</span> (rank == 0) {
+        global_sums = (<span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span>*)malloc(size * <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span>));
+    }
+
+    MPI_Gather(&amp;local_sum, 1, MPI_LONG_LONG_INT, global_sums, 1, MPI_LONG_LONG_INT, 0, MPI_COMM_WORLD);
+
+    <span style="color: #51afef;">if</span> (rank == 0) {
+        <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span> <span style="color: #dcaeea;">total_sum</span> = 0;
+
+        printf (<span style="color: #98be65;">"Array of local sums: \n"</span>);
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; size; i++) {
+            <span style="color: #5B6268;">//</span><span style="color: #5B6268;">printf("%d ", global_sums[i]);
+</span>            total_sum += global_sums[i];
+        }
+        endTime = MPI_Wtime();
+        printf(<span style="color: #98be65;">"rank %d : timing %lf\n"</span>, rank, endTime - startTime);
+        printf(<span style="color: #98be65;">"\nTotal sum = %lld\n"</span>, total_sum);
+        free(global_arr);
+        free(global_sums);
+    }
+
+    free(local_arr);
+    MPI_Finalize();
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">mpicc arrSum1.c -o arrSum1.out
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./arrSum1.out 100
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1165772
+</pre>
+</div>
+</div>
+<div id="outline-container-org3ae670f" class="outline-2">
+<h2 id="org3ae670f"><span class="section-number-2">40.</span> pi serial</h2>
+<div class="outline-text-2" id="text-40">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;math.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;sys/time.h&gt;</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>()
+{
+    <span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span> <span style="color: #dcaeea;">N</span> = 999999999999;
+    <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span> <span style="color: #dcaeea;">i</span>, <span style="color: #dcaeea;">j</span>;
+    <span style="color: #ECBE7B;">double</span> <span style="color: #dcaeea;">area</span>, <span style="color: #dcaeea;">pi</span>;
+    <span style="color: #ECBE7B;">double</span> <span style="color: #dcaeea;">dx</span>, <span style="color: #dcaeea;">y</span>, <span style="color: #dcaeea;">x</span>;
+    <span style="color: #ECBE7B;">double</span> <span style="color: #dcaeea;">exe_time</span>;
+    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">timeval</span> <span style="color: #dcaeea;">stop_time</span>, <span style="color: #dcaeea;">start_time</span>;
+    dx = (1.0 * 1L)/N;
+    x = 0.0;
+    area = 0.0;
+    gettimeofday(&amp;start_time, <span style="color: #a9a1e1;">NULL</span>);
+    <span style="color: #51afef;">for</span>(i=0;i&lt;N;i++){
+        x = i*dx;
+        y = sqrt(1-x*x);
+        area += y*dx;
+    }
+    gettimeofday(&amp;stop_time, <span style="color: #a9a1e1;">NULL</span>);
+    exe_time = (stop_time.tv_sec+(stop_time.tv_usec/1000000.0)) - (start_time.tv_sec+(start_time.tv_usec/1000000.0));
+    pi = 4.0*area;
+    printf(<span style="color: #98be65;">"\n Value of pi is = %.16lf\n Execution time is = %lf seconds\n"</span>, pi, exe_time);
+    <span style="color: #51afef;">return</span> 0;
+}
+
+</pre>
+</div>
+
+
+<div class="org-src-container">
+<pre class="src src-bash">gcc pi_serial.c -o pi_serial.out -lm
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script_serial.sh ./pi_serial.out
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1166094
+</pre>
+</div>
+</div>
+<div id="outline-container-org6a85cd4" class="outline-2">
+<h2 id="org6a85cd4"><span class="section-number-2">41.</span> pi parallel</h2>
+<div class="outline-text-2" id="text-41">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;mpi.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;math.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span><span style="color: #98be65;">&lt;sys/time.h&gt;</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>()
+{
+    MPI_Init(<span style="color: #a9a1e1;">NULL</span>, <span style="color: #a9a1e1;">NULL</span>);
+    <span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span> <span style="color: #dcaeea;">N</span> = 999999999999;
+    <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span> <span style="color: #dcaeea;">i</span>, <span style="color: #dcaeea;">j</span>;
+    <span style="color: #ECBE7B;">double</span> <span style="color: #dcaeea;">area</span>, <span style="color: #dcaeea;">pi</span>;
+    <span style="color: #ECBE7B;">double</span> <span style="color: #dcaeea;">dx</span>, <span style="color: #dcaeea;">y</span>, <span style="color: #dcaeea;">x</span>;
+    <span style="color: #ECBE7B;">double</span> <span style="color: #dcaeea;">exe_time</span>;
+    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">timeval</span> <span style="color: #dcaeea;">stop_time</span>, <span style="color: #dcaeea;">start_time</span>;
+    dx = 1.0/N;
+    x = 0.0;
+    area = 0.0;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">rank</span>, <span style="color: #dcaeea;">size</span>;
+    MPI_Comm_rank(MPI_COMM_WORLD, &amp;rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &amp;size);
+    <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span> <span style="color: #dcaeea;">chunksize</span> = N / size;
+    <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span> <span style="color: #dcaeea;">start</span> = rank * chunksize;
+    <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">long</span> <span style="color: #dcaeea;">end</span> = start + chunksize;
+    <span style="color: #51afef;">if</span>(rank == size - 1) end = N;
+    <span style="color: #51afef;">if</span>(rank == 0)
+        gettimeofday(&amp;start_time, <span style="color: #a9a1e1;">NULL</span>);
+    <span style="color: #51afef;">for</span>(i=start;i&lt;end;i++){
+        x = i*dx;
+        y = sqrt(1-x*x);
+        area += y*dx;
+    }
+    <span style="color: #ECBE7B;">double</span> <span style="color: #dcaeea;">finalarea</span>;
+    MPI_Reduce(&amp;area, &amp;finalarea, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    <span style="color: #51afef;">if</span>(rank == 0){
+        gettimeofday(&amp;stop_time, <span style="color: #a9a1e1;">NULL</span>);
+        exe_time = (stop_time.tv_sec+(stop_time.tv_usec/1000000.0)) - (start_time.tv_sec+(start_time.tv_usec/1000000.0));
+        pi = 4.0*finalarea;
+        printf(<span style="color: #98be65;">"\n Value of pi is = %.16lf\n Execution time is = %lf seconds\n"</span>, pi, exe_time);
+    }
+    MPI_Finalize();
+    <span style="color: #51afef;">return</span> 0;
+}
+
+</pre>
+</div>
+
+
+<div class="org-src-container">
+<pre class="src src-bash">mpicc pi_parallel.c -o pi_parallel.out -lm
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script.sh ./pi_parallel.out
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1166095
+</pre>
+
+
+<div class="org-src-container">
+<pre class="src src-bash">sbatch script_multinode.sh ./pi_parallel.out
+</pre>
+</div>
+
+<pre class="example">
+Submitted batch job 1166097
+</pre>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2025-11-08</p>
+<p class="author">Author: Abhishek Raj</p>
+<p class="date">Created: 2025-11-13 Thu 11:51</p>
+</div>
+</body>
+</html>
